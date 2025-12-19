@@ -1,0 +1,3 @@
+# Shopify CLI Configuration for ApexMind AI Labs
+project_type: node
+organization_id: # Will be filled after first app creation
