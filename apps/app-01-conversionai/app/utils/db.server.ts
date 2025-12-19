@@ -1,28 +1,41 @@
 /**
  * Prisma database client
  * Singleton pattern to prevent multiple instances in development
+ * Lazy-loaded to avoid crash if DATABASE_URL is not set
  */
 
 import { PrismaClient } from '@prisma/client';
 
-let prisma: PrismaClient;
+let prisma: PrismaClient | null = null;
 
 declare global {
-  var __db__: PrismaClient;
+  var __db__: PrismaClient | undefined;
 }
 
-// This is needed because in development we don't want to restart
-// the server with every change, but we want to make sure we don't
-// create a new connection to the DB with every change either.
-// In production, we'll have a single connection to the DB.
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  if (!global.__db__) {
-    global.__db__ = new PrismaClient();
+function createPrismaClient(): PrismaClient {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL environment variable is required");
   }
-  prisma = global.__db__;
-  prisma.$connect();
+  return new PrismaClient();
 }
 
-export { prisma };
+function getPrisma(): PrismaClient {
+  if (process.env.NODE_ENV === 'production') {
+    if (!prisma) {
+      prisma = createPrismaClient();
+    }
+    return prisma;
+  } else {
+    if (!global.__db__) {
+      global.__db__ = createPrismaClient();
+    }
+    return global.__db__;
+  }
+}
+
+// Export a proxy that lazily initializes prisma
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    return getPrisma()[prop as keyof PrismaClient];
+  }
+});

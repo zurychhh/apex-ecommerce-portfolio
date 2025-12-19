@@ -2,7 +2,18 @@ import { Session } from "@shopify/shopify-api";
 import { SessionStorage } from "@shopify/shopify-app-session-storage";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+// Lazy-load Prisma to avoid crash if DATABASE_URL not set
+let prisma: PrismaClient | null = null;
+
+function getPrisma(): PrismaClient {
+  if (!prisma) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is not set");
+    }
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 export class PrismaSessionStorage implements SessionStorage {
   async storeSession(session: Session): Promise<boolean> {
@@ -30,7 +41,7 @@ export class PrismaSessionStorage implements SessionStorage {
           session.onlineAccessInfo?.associated_user?.email_verified || false,
       };
 
-      await prisma.session.upsert({
+      await getPrisma().session.upsert({
         where: { id: session.id },
         update: data,
         create: data,
@@ -45,7 +56,7 @@ export class PrismaSessionStorage implements SessionStorage {
 
   async loadSession(id: string): Promise<Session | undefined> {
     try {
-      const sessionRecord = await prisma.session.findUnique({
+      const sessionRecord = await getPrisma().session.findUnique({
         where: { id },
       });
 
@@ -92,7 +103,7 @@ export class PrismaSessionStorage implements SessionStorage {
 
   async deleteSession(id: string): Promise<boolean> {
     try {
-      await prisma.session.delete({
+      await getPrisma().session.delete({
         where: { id },
       });
       return true;
@@ -104,7 +115,7 @@ export class PrismaSessionStorage implements SessionStorage {
 
   async deleteSessions(ids: string[]): Promise<boolean> {
     try {
-      await prisma.session.deleteMany({
+      await getPrisma().session.deleteMany({
         where: {
           id: { in: ids },
         },
@@ -118,7 +129,7 @@ export class PrismaSessionStorage implements SessionStorage {
 
   async findSessionsByShop(shop: string): Promise<Session[]> {
     try {
-      const sessionRecords = await prisma.session.findMany({
+      const sessionRecords = await getPrisma().session.findMany({
         where: { shop },
       });
 
