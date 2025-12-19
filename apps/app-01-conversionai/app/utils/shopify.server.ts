@@ -3,7 +3,7 @@
  * Wrappers for fetching store data, analytics, products, etc.
  */
 
-import { logger } from '@apex/shared-utils';
+import { logger } from '~/utils/logger.server';
 import '@shopify/shopify-api/adapters/node';
 import { shopifyApi, ApiVersion, Session } from '@shopify/shopify-api';
 

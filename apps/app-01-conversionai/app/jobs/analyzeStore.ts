@@ -17,7 +17,7 @@ import { fetchShopifyAnalytics, fetchProducts, fetchCurrentTheme } from '~/utils
 import { captureScreenshots } from './captureScreenshots';
 import { callClaudeAPI, buildAnalysisPrompt, parseRecommendations } from '~/utils/claude.server';
 import { sendAnalysisCompleteEmail } from '~/utils/email.server';
-import { logger } from '@apex/shared-utils';
+import { logger } from '~/utils/logger.server';
 
 export interface AnalyzeStoreJobData {
   shopId: string;

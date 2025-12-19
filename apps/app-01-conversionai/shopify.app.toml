@@ -1,9 +1,9 @@
 # Learn more about configuring your Shopify app at
 # https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "conversionai"
-client_id = "" # Will be filled by Shopify CLI
-application_url = "https://your-app.railway.app"
+name = "ConversionAI"
+client_id = "30c5af756ea767c28f82092b98ffc9e1"
+application_url = "https://conversionai-web-production.up.railway.app"
 embedded = true
 
 [access_scopes]
@@ -12,8 +12,10 @@ scopes = "read_products,read_orders,read_themes,read_analytics,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://your-app.railway.app/auth/callback",
-  "https://your-app.railway.app/auth/shopify/callback"
+  "https://conversionai-web-production.up.railway.app/auth/callback",
+  "https://conversionai-web-production.up.railway.app/auth/shopify/callback",
+  "http://localhost:3000/auth/callback",
+  "http://localhost:3000/auth/shopify/callback"
 ]
 
 [webhooks]

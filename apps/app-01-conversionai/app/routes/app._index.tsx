@@ -1,152 +1,250 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { Page, Layout, Card, Text, Button, Banner, ProgressBar } from '@shopify/polaris';
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import {
+  Page,
+  Layout,
+  Card,
+  Text,
+  Button,
+  Banner,
+  ProgressBar,
+  BlockStack,
+  InlineStack,
+} from "@shopify/polaris";
+import { authenticate } from "../shopify.server";
+import { PrismaClient } from "@prisma/client";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // TODO: Get actual shop data from session
-  // TODO: Fetch metrics and recommendations from database
+  const { session } = await authenticate.admin(request);
 
-  return json({
-    shop: {
-      domain: 'example.myshopify.com',
-      plan: 'free',
-      primaryGoal: 'Increase overall conversion rate',
-      lastAnalysis: null,
-    },
-    metrics: {
-      conversionRate: 2.3,
-      industryAverage: 2.8,
-      opportunity: 3400,
-    },
-    recommendations: {
-      total: 0,
-      pending: 0,
-      implemented: 0,
-    },
-    isAnalyzing: false,
-  });
+  const prisma = new PrismaClient();
+
+  try {
+    // Get shop data from our database
+    const shop = await prisma.shop.findUnique({
+      where: { domain: session.shop },
+      include: {
+        recommendations: {
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        },
+        metrics: {
+          orderBy: { recordedAt: "desc" },
+          take: 1,
+        },
+      },
+    });
+
+    // Count recommendations by status
+    const recommendationCounts = await prisma.recommendation.groupBy({
+      by: ["status"],
+      where: { shopId: shop?.id },
+      _count: true,
+    });
+
+    const pending =
+      recommendationCounts.find((r) => r.status === "pending")?._count || 0;
+    const implemented =
+      recommendationCounts.find((r) => r.status === "implemented")?._count || 0;
+    const total = recommendationCounts.reduce((acc, r) => acc + r._count, 0);
+
+    const latestMetrics = shop?.metrics[0];
+
+    return json({
+      shop: {
+        domain: session.shop,
+        plan: shop?.plan || "free",
+        primaryGoal: shop?.primaryGoal || "Increase overall conversion rate",
+        lastAnalysis: shop?.lastAnalysis?.toISOString() || null,
+        email: shop?.email,
+      },
+      metrics: {
+        conversionRate: latestMetrics?.conversionRate || 0,
+        industryAverage: 2.8,
+        opportunity: latestMetrics
+          ? Math.round(
+              (latestMetrics.conversionRate * 0.2 *
+                (latestMetrics.avgOrderValue || 100) *
+                (latestMetrics.totalSessions || 1000)) /
+                100
+            )
+          : 0,
+        avgOrderValue: latestMetrics?.avgOrderValue || 0,
+        cartAbandonmentRate: latestMetrics?.cartAbandonmentRate || 0,
+      },
+      recommendations: {
+        total,
+        pending,
+        implemented,
+        recent: shop?.recommendations.slice(0, 3) || [],
+      },
+      isAnalyzing: false,
+    });
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default function Dashboard() {
-  const { shop, metrics, recommendations, isAnalyzing } = useLoaderData<typeof loader>();
+  const { shop, metrics, recommendations, isAnalyzing } =
+    useLoaderData<typeof loader>();
+
+  const hasMetrics = metrics.conversionRate > 0;
 
   return (
     <Page
       title="ConversionAI Dashboard"
-      primaryAction={
-        <Button primary onClick={() => console.log('Start analysis')}>
-          Run New Analysis
-        </Button>
-      }
+      primaryAction={{
+        content: "Run New Analysis",
+        url: "/app/analysis/start",
+      }}
     >
-      <Layout>
+      <BlockStack gap="500">
         {!shop.lastAnalysis && (
-          <Layout.Section>
-            <Banner
-              title="Welcome to ConversionAI!"
-              status="info"
-              action={{ content: 'Get Started', url: '/app/onboarding' }}
-            >
-              <p>
-                Let's analyze your store and get actionable CRO recommendations in 60 seconds.
-              </p>
-            </Banner>
-          </Layout.Section>
+          <Banner
+            title="Welcome to ConversionAI!"
+            tone="info"
+            action={{ content: "Get Started", url: "/app/analysis/start" }}
+          >
+            <p>
+              Let&apos;s analyze your store and get actionable CRO
+              recommendations in 60 seconds.
+            </p>
+          </Banner>
         )}
 
         {isAnalyzing && (
-          <Layout.Section>
-            <Card>
-              <div style={{ padding: '20px' }}>
-                <Text as="h2" variant="headingMd">
-                  Analyzing your store...
-                </Text>
-                <ProgressBar progress={75} size="small" />
-                <Text as="p" variant="bodyMd">
-                  This will take 60-90 seconds. We're analyzing your store data, capturing
-                  screenshots, and consulting with AI.
-                </Text>
-              </div>
-            </Card>
-          </Layout.Section>
+          <Card>
+            <BlockStack gap="400">
+              <Text as="h2" variant="headingMd">
+                Analyzing your store...
+              </Text>
+              <ProgressBar progress={75} size="small" tone="primary" />
+              <Text as="p" variant="bodyMd" tone="subdued">
+                This will take 60-90 seconds. We&apos;re analyzing your store
+                data, capturing screenshots, and consulting with AI.
+              </Text>
+            </BlockStack>
+          </Card>
         )}
 
-        <Layout.Section>
-          <Layout>
-            <Layout.Section oneHalf>
-              <Card>
-                <div style={{ padding: '20px' }}>
-                  <Text as="h2" variant="headingMd">
-                    📊 Current Metrics
-                  </Text>
-                  <div style={{ marginTop: '16px' }}>
+        <Layout>
+          <Layout.Section variant="oneHalf">
+            <Card>
+              <BlockStack gap="400">
+                <Text as="h2" variant="headingMd">
+                  Current Metrics
+                </Text>
+                {hasMetrics ? (
+                  <BlockStack gap="200">
                     <Text as="p" variant="bodyLg">
-                      Conversion Rate: {metrics.conversionRate}%
+                      Conversion Rate: {metrics.conversionRate.toFixed(2)}%
                     </Text>
-                    <Text as="p" variant="bodySm" color="subdued">
-                      Industry Avg: {metrics.industryAverage}% ↗️
+                    <Text as="p" variant="bodySm" tone="subdued">
+                      Industry Avg: {metrics.industryAverage}%
                     </Text>
-                    <Text as="p" variant="bodyMd">
-                      Opportunity: +${metrics.opportunity.toLocaleString()}/mo
-                    </Text>
-                  </div>
-                </div>
-              </Card>
-            </Layout.Section>
-
-            <Layout.Section oneHalf>
-              <Card>
-                <div style={{ padding: '20px' }}>
-                  <Text as="h2" variant="headingMd">
-                    🎯 Primary Goal
-                  </Text>
-                  <div style={{ marginTop: '16px' }}>
-                    <Text as="p" variant="bodyMd">
-                      {shop.primaryGoal || 'Not set'}
-                    </Text>
-                    {shop.lastAnalysis && (
-                      <Text as="p" variant="bodySm" color="subdued">
-                        Last Analysis: {new Date(shop.lastAnalysis).toLocaleDateString()}
+                    {metrics.opportunity > 0 && (
+                      <Text as="p" variant="bodyMd" tone="success">
+                        Opportunity: +${metrics.opportunity.toLocaleString()}/mo
                       </Text>
                     )}
-                  </div>
-                </div>
-              </Card>
-            </Layout.Section>
-          </Layout>
-        </Layout.Section>
+                  </BlockStack>
+                ) : (
+                  <Text as="p" variant="bodyMd" tone="subdued">
+                    Run your first analysis to see metrics
+                  </Text>
+                )}
+              </BlockStack>
+            </Card>
+          </Layout.Section>
 
-        <Layout.Section>
-          <Card>
-            <div style={{ padding: '20px' }}>
-              <Text as="h2" variant="headingMd">
-                💡 Recommendations ({recommendations.total})
-              </Text>
-              {recommendations.total === 0 ? (
-                <div style={{ marginTop: '16px', textAlign: 'center', padding: '40px' }}>
-                  <Text as="p" variant="bodyMd" color="subdued">
-                    No recommendations yet. Run your first analysis to get started!
-                  </Text>
-                  <div style={{ marginTop: '16px' }}>
-                    <Button primary url="/app/analysis/start">
-                      Start Analysis
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ marginTop: '16px' }}>
+          <Layout.Section variant="oneHalf">
+            <Card>
+              <BlockStack gap="400">
+                <Text as="h2" variant="headingMd">
+                  Your Store
+                </Text>
+                <BlockStack gap="200">
                   <Text as="p" variant="bodyMd">
-                    Pending: {recommendations.pending} | Implemented: {recommendations.implemented}
+                    {shop.domain}
                   </Text>
-                  <div style={{ marginTop: '16px' }}>
-                    <Button url="/app/recommendations">View All Recommendations</Button>
-                  </div>
-                </div>
+                  <Text as="p" variant="bodySm" tone="subdued">
+                    Plan: {shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)}
+                  </Text>
+                  {shop.lastAnalysis && (
+                    <Text as="p" variant="bodySm" tone="subdued">
+                      Last Analysis:{" "}
+                      {new Date(shop.lastAnalysis).toLocaleDateString()}
+                    </Text>
+                  )}
+                </BlockStack>
+              </BlockStack>
+            </Card>
+          </Layout.Section>
+        </Layout>
+
+        <Card>
+          <BlockStack gap="400">
+            <InlineStack align="space-between">
+              <Text as="h2" variant="headingMd">
+                Recommendations ({recommendations.total})
+              </Text>
+              {recommendations.total > 0 && (
+                <Button url="/app/recommendations" variant="plain">
+                  View All
+                </Button>
               )}
-            </div>
-          </Card>
-        </Layout.Section>
-      </Layout>
+            </InlineStack>
+
+            {recommendations.total === 0 ? (
+              <BlockStack gap="400" align="center">
+                <Text as="p" variant="bodyMd" tone="subdued">
+                  No recommendations yet. Run your first analysis to get
+                  started!
+                </Text>
+                <Button url="/app/analysis/start" variant="primary">
+                  Start Analysis
+                </Button>
+              </BlockStack>
+            ) : (
+              <BlockStack gap="300">
+                <InlineStack gap="400">
+                  <Text as="p" variant="bodyMd">
+                    Pending: {recommendations.pending}
+                  </Text>
+                  <Text as="p" variant="bodyMd">
+                    Implemented: {recommendations.implemented}
+                  </Text>
+                </InlineStack>
+                {recommendations.recent.length > 0 && (
+                  <BlockStack gap="200">
+                    {recommendations.recent.map((rec: any) => (
+                      <Card key={rec.id} padding="300">
+                        <InlineStack align="space-between">
+                          <BlockStack gap="100">
+                            <Text as="p" variant="bodyMd" fontWeight="semibold">
+                              {rec.title}
+                            </Text>
+                            <Text as="p" variant="bodySm" tone="subdued">
+                              {rec.category} • Impact: {rec.impactScore}/10
+                            </Text>
+                          </BlockStack>
+                          <Button
+                            url={`/app/recommendations/${rec.id}`}
+                            variant="plain"
+                          >
+                            View
+                          </Button>
+                        </InlineStack>
+                      </Card>
+                    ))}
+                  </BlockStack>
+                )}
+              </BlockStack>
+            )}
+          </BlockStack>
+        </Card>
+      </BlockStack>
     </Page>
   );
 }

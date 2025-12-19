@@ -4,7 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { logger } from '@apex/shared-utils';
+import { logger } from '~/utils/logger.server';
 import type { Screenshot } from '~/jobs/captureScreenshots';
 import type { ShopifyAnalytics, ShopifyProduct } from './shopify.server';
 

@@ -1,0 +1,16 @@
+# Web frontend configuration for Shopify CLI
+# This tells the CLI how to run the Remix dev server
+
+[commands]
+dev = "npm run dev"
+build = "npm run build"
+
+# The type of web component
+# Options: frontend, backend, background
+type = "frontend"
+
+# Which roles this web component fulfills
+roles = ["frontend"]
+
+# Path to app directory (relative to this file)
+path = "."

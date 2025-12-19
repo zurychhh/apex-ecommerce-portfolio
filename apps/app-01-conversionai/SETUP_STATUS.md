@@ -1,7 +1,37 @@
 # 🎯 ConversionAI - Setup Status
 
 **Last Updated**: 2025-12-19
-**Status**: ✅ Scaffolding Complete - Ready for Development
+**Status**: ✅ Infrastructure Complete - Ready for Deployment
+
+---
+
+## 🚀 Production Infrastructure
+
+### Railway Project
+| Resource | ID/Value |
+|----------|----------|
+| **Project ID** | `c1ad5a4a-a4ff-4698-bf0f-e1f950623869` |
+| **Environment ID** | `6fd2892b-9846-4e7b-bf9a-dafef8bc1c4e` |
+| **Web Service ID** | `08837d5d-0ed5-4332-882e-51d00b61eee6` |
+| **PostgreSQL Service ID** | `7ea07ba1-13ee-4da6-8344-8b8e75477eb9` |
+| **Redis Service ID** | `3a2363c9-1f26-4819-99fb-66cc36699ad8` |
+| **Domain** | `conversionai-web-production.up.railway.app` |
+| **PostgreSQL Host** | `turntable.proxy.rlwy.net:50904` |
+| **Redis Host** | `mainline.proxy.rlwy.net:43368` |
+
+### Shopify App
+| Setting | Value |
+|---------|-------|
+| **Client ID** | `30c5af756ea767c28f82092b98ffc9e1` |
+| **App Name** | ConversionAI |
+| **Organization ID** | `4661608` |
+| **App URL** | `https://conversionai-web-production.up.railway.app` |
+| **Scopes** | `read_products,read_orders,read_themes,read_analytics,read_customers` |
+
+### GitHub Actions
+- Workflow: `/.github/workflows/deploy-conversionai.yml`
+- Triggers: Push to `main` (paths: `apps/app-01-conversionai/**`)
+- Required Secret: `RAILWAY_TOKEN`
 
 ---
 
@@ -12,12 +42,14 @@
 - [x] **Dependencies Installed**: 659 packages (884 total with sub-dependencies)
 - [x] **TypeScript Configuration**: Strict mode enabled
 - [x] **Shared Packages Linked**: All @apex/* packages available
+- [x] **Railway Project**: Created via API with PostgreSQL + Redis + Web service
+- [x] **GitHub Actions**: Deployment workflow configured
 
 ### Database
-- [x] **Prisma Schema Created**: 4 models (Shop, Recommendation, ShopMetrics, Subscription)
+- [x] **Prisma Schema Created**: 5 models (Shop, Recommendation, ShopMetrics, Subscription, Session)
 - [x] **Database Models Extended**: Shop model enhanced for ConversionAI
 - [x] **Indexes Configured**: Optimized queries for shopId, status, priority
-- [ ] **Migrations Run**: Pending - requires DATABASE_URL
+- [x] **Database Synced**: Schema pushed to Railway PostgreSQL
 
 ### Backend Structure
 - [x] **Routes Created**: 6 routes (dashboard, recommendations, analysis, settings, auth)
