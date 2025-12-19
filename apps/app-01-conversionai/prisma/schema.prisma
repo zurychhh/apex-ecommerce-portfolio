@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core shop model (extended for ConversionAI)
+model Shop {
+  id            String   @id @default(cuid())
+  domain        String   @unique
+  accessToken   String
+  scope         String
+  isActive      Boolean  @default(true)
+
+  // ConversionAI specific fields
+  plan          String   @default("free") // free, basic, pro, enterprise
+  primaryGoal   String?  // User's primary CRO goal
+  lastAnalysis  DateTime?
+  email         String?  // For notifications
+
+  installedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  subscriptions   Subscription[]
+  recommendations Recommendation[]
+  metrics         ShopMetrics[]
+
+  @@index([domain])
+  @@index([plan])
+}
+
+// Billing subscriptions (shared across all apps)
+model Subscription {
+  id                String   @id @default(cuid())
+  shopId            String
+  plan              String   // 'free', 'basic', 'pro', 'enterprise'
+  status            String   // 'active', 'cancelled', 'expired'
+  billingOn         DateTime?
+  trialEndsOn       DateTime?
+  shopifyChargeId   String?  @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  shop              Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([status])
+}
+
+// AI-generated recommendations
+model Recommendation {
+  id              String   @id @default(cuid())
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Recommendation content
+  title           String
+  description     String   @db.Text
+  category        String   // "hero_section", "product_page", "cart_flow", etc.
+
+  // Scoring
+  impactScore     Int      // 1-5 (how much this will move the needle)
+  effortScore     Int      // 1-5 (implementation difficulty)
+  priority        Int      // Calculated: (impact * 2) - effort
+
+  // Estimates
+  estimatedUplift String   // "+0.3-0.5% conversion rate"
+  estimatedROI    String   // "+$2,100-3,500/mo"
+
+  // Implementation details
+  reasoning       String   @db.Text // Why this matters
+  implementation  String   @db.Text // Step-by-step guide
+  codeSnippet     String?  @db.Text // Copy-paste code (optional)
+  mockupUrl       String?  // Before/After screenshot URL
+
+  // User actions
+  status          String   @default("pending") // pending, implemented, skipped
+  implementedAt   DateTime?
+  userRating      Int?     // 1-5 stars (user feedback)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([shopId])
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+}
+
+// Store metrics snapshots
+model ShopMetrics {
+  id                    String   @id @default(cuid())
+  shopId                String
+  shop                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  // Key metrics
+  conversionRate        Float
+  avgOrderValue         Float
+  cartAbandonmentRate   Float
+  mobileConversionRate  Float?
+  desktopConversionRate Float?
+
+  // Traffic data
+  totalSessions         Int?
+  totalOrders           Int?
+  totalRevenue          Float?
+
+  recordedAt            DateTime @default(now())
+
+  @@index([shopId])
+  @@index([recordedAt])
+}

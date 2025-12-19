@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core shop model (shared across all apps)
+model Shop {
+  id           String   @id @default(cuid())
+  domain       String   @unique
+  accessToken  String
+  scope        String
+  isActive     Boolean  @default(true)
+  installedAt  DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  subscriptions Subscription[]
+
+  @@index([domain])
+}
+
+// Billing subscriptions (shared across all apps)
+model Subscription {
+  id                String   @id @default(cuid())
+  shopId            String
+  plan              String   // 'free', 'basic', 'pro', 'enterprise'
+  status            String   // 'active', 'cancelled', 'expired'
+  billingOn         DateTime?
+  trialEndsOn       DateTime?
+  shopifyChargeId   String?  @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  shop              Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([status])
+}
+
+// App-specific models will extend this in individual apps

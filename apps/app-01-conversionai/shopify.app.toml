@@ -1,0 +1,41 @@
+# Learn more about configuring your Shopify app at
+# https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "conversionai"
+client_id = "" # Will be filled by Shopify CLI
+application_url = "https://your-app.railway.app"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/api/usage/access-scopes
+scopes = "read_products,read_orders,read_themes,read_analytics,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://your-app.railway.app/auth/callback",
+  "https://your-app.railway.app/auth/shopify/callback"
+]
+
+[webhooks]
+api_version = "2024-01"
+
+# GDPR webhooks (required for app approval)
+[[webhooks.subscriptions]]
+topics = [ "customers/data_request" ]
+uri = "/webhooks/gdpr/customers-data-request"
+
+[[webhooks.subscriptions]]
+topics = [ "customers/redact" ]
+uri = "/webhooks/gdpr/customers-redact"
+
+[[webhooks.subscriptions]]
+topics = [ "shop/redact" ]
+uri = "/webhooks/gdpr/shop-redact"
+
+# Optional: App uninstalled webhook
+[[webhooks.subscriptions]]
+topics = [ "app/uninstalled" ]
+uri = "/webhooks/app-uninstalled"
+
+[pos]
+embedded = false
