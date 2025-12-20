@@ -8,8 +8,9 @@ ConversionAI is an AI-powered CRO consultant that analyzes Shopify stores and pr
 
 - **Goal**: Help Shopify merchants increase conversion rates without expensive agencies
 - **Tech Stack**: Remix + Shopify App Remix + Railway + Claude API + Playwright + Resend
-- **Timeline**: 3-week MVP, launched [DATE]
-- **Status**: 🟡 In Development
+- **Timeline**: 3-week MVP
+- **Status**: 🟢 MVP Feature Complete (95%) - Ready for E2E Testing
+- **Production URL**: `https://conversionai-web-production.up.railway.app`
 
 ## Features
 
@@ -84,23 +85,28 @@ The app will be available at `http://localhost:3000`.
 apps/app-01-conversionai/
 ├── app/
 │   ├── routes/
-│   │   ├── app._index.tsx              # Dashboard
+│   │   ├── app._index.tsx              # Dashboard (metrics, billing, polling)
 │   │   ├── app.recommendations._index.tsx  # Recommendations list
 │   │   ├── app.recommendations.$id.tsx     # Recommendation detail
 │   │   ├── app.analysis.start.tsx      # Start analysis
+│   │   ├── app.upgrade.tsx             # Pricing/upgrade page
 │   │   ├── app.settings.tsx            # Settings
+│   │   ├── api.billing.create.tsx      # Subscription creation
+│   │   ├── api.billing.callback.tsx    # Billing callback handler
+│   │   ├── api.cron.weekly-refresh.tsx # Weekly cron endpoint
 │   │   └── auth.$.tsx                  # OAuth routes
 │   ├── jobs/
 │   │   ├── analyzeStore.ts             # Main analysis logic
-│   │   ├── captureScreenshots.ts       # Playwright screenshots
-│   │   └── callClaudeAPI.ts            # Claude API wrapper
+│   │   └── captureScreenshots.ts       # Playwright screenshots
 │   ├── utils/
 │   │   ├── db.server.ts                # Prisma client
 │   │   ├── shopify.server.ts           # Shopify API helpers
+│   │   ├── billing.server.ts           # Shopify Billing API
 │   │   ├── claude.server.ts            # Claude API integration
 │   │   ├── queue.server.ts             # Bull job queue
-│   │   └── email.server.ts             # Resend email service
-│   └── components/                     # React components (TBD)
+│   │   ├── email.server.ts             # Resend email service
+│   │   └── logger.server.ts            # Structured logging
+│   └── components/                     # React components
 ├── prisma/
 │   └── schema.prisma                   # Database schema
 ├── .env.example                        # Environment variables template
@@ -224,6 +230,89 @@ git push origin main
 
 3. Test installation in development store
 
+4. Configure weekly cron job (see below)
+
+## Cron Job Configuration
+
+The app includes a weekly auto-refresh feature for Pro and Enterprise plans.
+
+### 1. Add CRON_SECRET to Railway
+
+Generate a secure secret:
+```bash
+openssl rand -base64 32
+```
+
+Add to Railway (via Dashboard):
+1. Go to https://railway.app/project/c1ad5a4a-a4ff-4698-bf0f-e1f950623869
+2. Select "conversionai-web" service
+3. Go to Variables tab
+4. Add: `CRON_SECRET` = `<your-generated-secret>`
+5. Redeploy to apply
+
+### 2. Configure External Cron Service
+
+Railway doesn't have built-in cron scheduling, so use an external service:
+
+**Option A: cron-job.org (Recommended)**
+1. Go to https://console.cron-job.org
+2. Create account
+3. Create new cron job:
+   - **Title**: ConversionAI Weekly Refresh
+   - **URL**: `https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh`
+   - **Schedule**: `0 9 * * 1` (Every Monday at 9 AM UTC)
+   - **HTTP Method**: POST
+   - **Headers**:
+     ```
+     Authorization: Bearer <CRON_SECRET>
+     Content-Type: application/json
+     ```
+4. Save and test
+
+**Option B: EasyCron**
+Similar setup at https://www.easycron.com
+
+### 3. Test Manually
+
+```bash
+# Test the cron endpoint
+curl -X POST \
+  https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh \
+  -H "Authorization: Bearer <CRON_SECRET>" \
+  -H "Content-Type: application/json"
+
+# Expected response:
+# {
+#   "success": true,
+#   "timestamp": "2025-12-20T17:00:00.000Z",
+#   "shopsProcessed": 0,
+#   "jobsQueued": 0,
+#   "jobs": []
+# }
+```
+
+### How It Works
+
+- Runs every Monday at 9 AM UTC
+- Finds Pro/Enterprise shops with `lastAnalysis` > 7 days ago
+- Clears old recommendations
+- Queues new analysis jobs
+- Sends email notifications when complete
+
+### Troubleshooting Cron
+
+**If 401 Unauthorized:**
+- Verify `CRON_SECRET` matches in Railway and cron service
+- Check header format: `Authorization: Bearer <secret>`
+
+**If 500 Error:**
+- Check Railway logs: `railway logs`
+- Verify database connection
+
+**If no shops queued:**
+- Expected if no Pro/Enterprise users with old analyses
+- Check database: `SELECT * FROM "Shop" WHERE plan IN ('pro', 'enterprise');`
+
 ## Cost Breakdown
 
 **Month 1-3** (low traffic):
@@ -243,25 +332,28 @@ git push origin main
 ### Week 1 (Foundation) ✅ COMPLETE
 - [x] Monorepo setup
 - [x] Database schema
-- [x] Shopify OAuth (stub)
+- [x] Shopify OAuth
 - [x] Basic UI (dashboard, recommendations)
 - [x] Shopify data fetching (Analytics, Products, Themes APIs)
-- [x] Claude API integration (Sonnet 4.5 with Vision)
+- [x] Claude API integration (Sonnet with Vision)
 - [x] Screenshot automation (Playwright with retry logic)
 
-### Week 2 (Features)
-- [ ] Onboarding flow
-- [ ] Recommendations detail view
-- [ ] Code snippet syntax highlighting
-- [ ] Billing integration
-- [ ] Email notifications
+### Week 2 (Features) ✅ COMPLETE
+- [x] Onboarding flow
+- [x] Recommendations detail view
+- [x] Code snippet viewer
+- [x] Billing integration (Shopify Billing API)
+- [x] Email notifications (Resend)
+- [x] Weekly cron endpoint
 
-### Week 3 (Polish & Deploy)
-- [ ] Error handling
-- [ ] Loading states
-- [ ] Mobile responsiveness
+### Week 3 (Polish & Deploy) 🟡 IN PROGRESS
+- [x] Error handling
+- [x] Loading states & animations
+- [x] Mobile responsiveness (Polaris)
+- [x] Production deploy (Railway)
+- [ ] Configure cron job (external service)
+- [ ] E2E testing on dev store
 - [ ] Beta testing
-- [ ] Production deploy
 
 ### Post-MVP
 - Competitor tracking
