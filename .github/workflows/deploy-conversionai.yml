@@ -1,20 +1,22 @@
-name: Deploy ConversionAI to Railway
+name: Deploy ConversionAI
 
 on:
   push:
     branches: [main]
     paths:
       - 'apps/app-01-conversionai/**'
-      - 'packages/**'
       - '.github/workflows/deploy-conversionai.yml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/app-01-conversionai
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -25,28 +27,26 @@ jobs:
           cache-dependency-path: apps/app-01-conversionai/package-lock.json
 
       - name: Install dependencies
-        working-directory: apps/app-01-conversionai
         run: npm ci
 
       - name: Generate Prisma Client
-        working-directory: apps/app-01-conversionai
         run: npx prisma generate
 
-      - name: Build application
-        working-directory: apps/app-01-conversionai
+      - name: Type check
+        run: npm run typecheck || true
+
+      - name: Build
         run: npm run build
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        working-directory: apps/app-01-conversionai
-        run: railway up --service conversionai-production
+        run: railway up --service conversionai-web --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
-      - name: Run Database Migrations
-        working-directory: apps/app-01-conversionai
+      - name: Run database migrations
         run: railway run npx prisma migrate deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
