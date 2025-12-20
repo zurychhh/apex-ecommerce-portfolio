@@ -4,7 +4,7 @@
  */
 
 import { chromium } from 'playwright';
-import { logger } from '~/utils/logger.server';
+import { logger } from '../utils/logger.server';
 
 export interface Screenshot {
   url: string;

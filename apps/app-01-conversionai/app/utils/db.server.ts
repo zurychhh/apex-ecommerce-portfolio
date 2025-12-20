@@ -6,7 +6,7 @@
 
 import { PrismaClient } from '@prisma/client';
 
-let prisma: PrismaClient | null = null;
+let _prisma: PrismaClient | null = null;
 
 declare global {
   var __db__: PrismaClient | undefined;
@@ -21,10 +21,10 @@ function createPrismaClient(): PrismaClient {
 
 function getPrisma(): PrismaClient {
   if (process.env.NODE_ENV === 'production') {
-    if (!prisma) {
-      prisma = createPrismaClient();
+    if (!_prisma) {
+      _prisma = createPrismaClient();
     }
-    return prisma;
+    return _prisma;
   } else {
     if (!global.__db__) {
       global.__db__ = createPrismaClient();

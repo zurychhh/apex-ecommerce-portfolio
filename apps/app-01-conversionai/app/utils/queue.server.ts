@@ -4,8 +4,8 @@
  */
 
 import Bull from 'bull';
-import { analyzeStore, type AnalyzeStoreJobData } from '~/jobs/analyzeStore';
-import { logger } from '~/utils/logger.server';
+import { analyzeStore, type AnalyzeStoreJobData } from '../jobs/analyzeStore';
+import { logger } from './logger.server';
 
 // Redis configuration (Railway provides REDIS_URL)
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';

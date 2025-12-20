@@ -4,7 +4,7 @@
  */
 
 import { Resend } from 'resend';
-import { logger } from '~/utils/logger.server';
+import { logger } from './logger.server';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

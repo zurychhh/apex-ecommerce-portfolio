@@ -12,12 +12,12 @@
  * 8. Send email notification
  */
 
-import { prisma } from '~/utils/db.server';
-import { fetchShopifyAnalytics, fetchProducts, fetchCurrentTheme } from '~/utils/shopify.server';
+import { prisma } from '../utils/db.server';
+import { fetchShopifyAnalytics, fetchProducts, fetchCurrentTheme } from '../utils/shopify.server';
 import { captureScreenshots } from './captureScreenshots';
-import { callClaudeAPI, buildAnalysisPrompt, parseRecommendations } from '~/utils/claude.server';
-import { sendAnalysisCompleteEmail } from '~/utils/email.server';
-import { logger } from '~/utils/logger.server';
+import { callClaudeAPI, buildAnalysisPrompt, parseRecommendations } from '../utils/claude.server';
+import { sendAnalysisCompleteEmail } from '../utils/email.server';
+import { logger } from '../utils/logger.server';
 
 export interface AnalyzeStoreJobData {
   shopId: string;
@@ -102,7 +102,23 @@ export async function analyzeStore(data: AnalyzeStoreJobData) {
       },
     });
 
-    // 10. Send email notification
+    // 10. Save ShopMetrics snapshot
+    logger.info('Saving shop metrics...');
+    await prisma.shopMetrics.create({
+      data: {
+        shopId,
+        conversionRate: analytics.conversionRate,
+        avgOrderValue: analytics.avgOrderValue,
+        cartAbandonmentRate: analytics.cartAbandonmentRate,
+        mobileConversionRate: analytics.mobileConversionRate,
+        desktopConversionRate: analytics.desktopConversionRate,
+        totalSessions: analytics.totalSessions,
+        totalOrders: analytics.totalOrders,
+        totalRevenue: analytics.totalRevenue,
+      },
+    });
+
+    // 11. Send email notification
     if (shop.email) {
       logger.info(`Sending email notification to ${shop.email}`);
       await sendAnalysisCompleteEmail(shop.email, recommendations.length);

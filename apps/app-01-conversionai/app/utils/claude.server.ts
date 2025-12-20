@@ -4,8 +4,8 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { logger } from '~/utils/logger.server';
-import type { Screenshot } from '~/jobs/captureScreenshots';
+import { logger } from './logger.server';
+import type { Screenshot } from '../jobs/captureScreenshots';
 import type { ShopifyAnalytics, ShopifyProduct } from './shopify.server';
 
 const anthropic = new Anthropic({
@@ -128,7 +128,7 @@ export async function callClaudeAPI(
     logger.info(`Sending ${imageContent.length} screenshots to Claude`);
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929', // Latest Sonnet 4.5 model
+      model: 'claude-sonnet-4-20250514', // Claude Sonnet 4
       max_tokens: 8000, // Increased for more detailed recommendations
       messages: [
         {

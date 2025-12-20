@@ -1,29 +1,70 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node';
 import { Form, useLoaderData, useNavigation } from '@remix-run/react';
-import { Page, Card, Text, Button, Select } from '@shopify/polaris';
+import { Page, Card, Text, Button, Select, Banner } from '@shopify/polaris';
 import { useState } from 'react';
+import { authenticate } from '../shopify.server';
+import { prisma } from '../utils/db.server';
+import { queueAnalysis } from '../utils/queue.server';
+import { logger } from '../utils/logger.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // TODO: Get shop info from session
+  const { session } = await authenticate.admin(request);
+
+  const shop = await prisma.shop.findUnique({
+    where: { domain: session.shop },
+    select: {
+      domain: true,
+      primaryGoal: true,
+      lastAnalysis: true,
+    },
+  });
+
   return json({
     shop: {
-      domain: 'example.myshopify.com',
-      primaryGoal: null,
+      domain: session.shop,
+      primaryGoal: shop?.primaryGoal || null,
+      lastAnalysis: shop?.lastAnalysis?.toISOString() || null,
     },
   });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
   const formData = await request.formData();
-  const primaryGoal = formData.get('primaryGoal');
+  const primaryGoal = formData.get('primaryGoal') as string || 'Increase overall conversion rate';
 
-  // TODO: Save primary goal to database
-  // TODO: Queue analysis job
+  try {
+    // Get shop from database
+    const shop = await prisma.shop.findUnique({
+      where: { domain: session.shop },
+    });
 
-  console.log('Starting analysis with goal:', primaryGoal);
+    if (!shop) {
+      logger.error(`Shop not found: ${session.shop}`);
+      return json({ error: 'Shop not found. Please reinstall the app.' }, { status: 404 });
+    }
 
-  // Redirect to dashboard with analysis in progress
-  return redirect('/app');
+    // Clear previous recommendations
+    await prisma.recommendation.deleteMany({
+      where: { shopId: shop.id },
+    });
+
+    // Queue the analysis job
+    const job = await queueAnalysis({
+      shopId: shop.id,
+      shopDomain: shop.domain,
+      primaryGoal,
+    });
+
+    logger.info(`Analysis job queued: ${job.id} for ${shop.domain} with goal: ${primaryGoal}`);
+
+    // Redirect to dashboard - analysis will complete in background
+    return redirect('/app?analyzing=true');
+
+  } catch (error: any) {
+    logger.error('Failed to start analysis:', error);
+    return json({ error: 'Failed to start analysis. Please try again.' }, { status: 500 });
+  }
 };
 
 export default function StartAnalysis() {
@@ -31,10 +72,9 @@ export default function StartAnalysis() {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
 
-  const [selectedGoal, setSelectedGoal] = useState(shop.primaryGoal || '');
+  const [selectedGoal, setSelectedGoal] = useState(shop.primaryGoal || 'increase_conversion');
 
   const goalOptions = [
-    { label: 'Select your primary goal...', value: '' },
     { label: 'Increase overall conversion rate', value: 'increase_conversion' },
     { label: 'Reduce cart abandonment', value: 'reduce_abandonment' },
     { label: 'Increase average order value', value: 'increase_aov' },
@@ -42,17 +82,33 @@ export default function StartAnalysis() {
     { label: 'Boost mobile conversion', value: 'boost_mobile' },
   ];
 
+  const goalLabels: Record<string, string> = {
+    increase_conversion: 'Increase overall conversion rate',
+    reduce_abandonment: 'Reduce cart abandonment',
+    increase_aov: 'Increase average order value',
+    improve_pdp: 'Improve product page conversion',
+    boost_mobile: 'Boost mobile conversion',
+  };
+
   return (
     <Page
       title="Start Analysis"
       backAction={{ url: '/app' }}
     >
+      {shop.lastAnalysis && (
+        <div style={{ marginBottom: '16px' }}>
+          <Banner tone="info">
+            Last analysis: {new Date(shop.lastAnalysis).toLocaleDateString()}. Running a new analysis will replace your existing recommendations.
+          </Banner>
+        </div>
+      )}
+
       <Card>
         <div style={{ padding: '20px' }}>
           <Text as="h2" variant="headingMd">
-            🎯 What's your primary goal?
+            What&apos;s your primary goal?
           </Text>
-          <Text as="p" variant="bodyMd" color="subdued">
+          <Text as="p" variant="bodyMd" tone="subdued">
             This helps our AI focus on the most relevant recommendations for your store.
           </Text>
 
@@ -67,8 +123,10 @@ export default function StartAnalysis() {
               />
             </div>
 
+            <input type="hidden" name="primaryGoalLabel" value={goalLabels[selectedGoal] || selectedGoal} />
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Button submit primary loading={isSubmitting} disabled={!selectedGoal}>
+              <Button submit variant="primary" loading={isSubmitting} disabled={!selectedGoal}>
                 {isSubmitting ? 'Starting Analysis...' : 'Start Analysis'}
               </Button>
               <Button url="/app">Cancel</Button>
@@ -80,13 +138,13 @@ export default function StartAnalysis() {
               What happens next?
             </Text>
             <ul style={{ marginTop: '12px', paddingLeft: '20px' }}>
-              <li><Text as="span" variant="bodyMd">We'll analyze your store data (analytics, products, theme)</Text></li>
+              <li><Text as="span" variant="bodyMd">We&apos;ll analyze your store data (analytics, products, theme)</Text></li>
               <li><Text as="span" variant="bodyMd">Capture screenshots of key pages</Text></li>
               <li><Text as="span" variant="bodyMd">Compare with industry benchmarks</Text></li>
               <li><Text as="span" variant="bodyMd">Generate 10-15 prioritized recommendations</Text></li>
             </ul>
-            <Text as="p" variant="bodySm" color="subdued">
-              This process takes 60-90 seconds. You'll receive an email when it's complete.
+            <Text as="p" variant="bodySm" tone="subdued">
+              This process takes 60-90 seconds. You&apos;ll receive an email when it&apos;s complete.
             </Text>
           </div>
         </div>
