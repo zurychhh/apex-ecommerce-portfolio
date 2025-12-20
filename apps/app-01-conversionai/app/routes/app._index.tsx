@@ -12,15 +12,20 @@ import {
   InlineStack,
   Spinner,
   Box,
+  Badge,
 } from "@shopify/polaris";
 import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import { prisma } from "../utils/db.server";
+import { PLANS, canPerformAnalysis } from "../utils/billing.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const url = new URL(request.url);
   const analyzingParam = url.searchParams.get("analyzing") === "true";
+  const upgraded = url.searchParams.get("upgraded") === "true";
+  const upgradeCancelled = url.searchParams.get("upgrade_cancelled") === "true";
+  const billingError = url.searchParams.get("billing_error") === "true";
 
   // Get shop data from our database
   const shop = await prisma.shop.findUnique({
@@ -54,10 +59,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const latestMetrics = shop?.metrics[0];
 
+  // Check billing limits
+  const currentPlan = shop?.plan || "free";
+  const planConfig = PLANS[currentPlan] || PLANS.free;
+
+  // Count analyses this month
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const analysisCountThisMonth = shop?.lastAnalysis && shop.lastAnalysis >= startOfMonth ? 1 : 0;
+  const billingCheck = await canPerformAnalysis(currentPlan, analysisCountThisMonth);
+
   return json({
     shop: {
       domain: session.shop,
-      plan: shop?.plan || "free",
+      plan: currentPlan,
       primaryGoal: shop?.primaryGoal || "Increase overall conversion rate",
       lastAnalysis: shop?.lastAnalysis?.toISOString() || null,
       email: shop?.email,
@@ -82,17 +99,30 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       implemented,
       recent: shop?.recommendations.slice(0, 3) || [],
     },
+    billing: {
+      canAnalyze: billingCheck.allowed,
+      limitReason: billingCheck.reason,
+      analysisLimit: planConfig.features.analysisPerMonth,
+      analysisUsed: analysisCountThisMonth,
+    },
+    notifications: {
+      upgraded,
+      upgradeCancelled,
+      billingError,
+    },
     analyzingParam,
   });
 };
 
 export default function Dashboard() {
-  const { shop, metrics, recommendations, analyzingParam } =
+  const { shop, metrics, recommendations, billing, notifications, analyzingParam } =
     useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
   const [isAnalyzing, setIsAnalyzing] = useState(analyzingParam);
   const [progress, setProgress] = useState(10);
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(notifications.upgraded);
+  const [showCancelledBanner, setShowCancelledBanner] = useState(notifications.upgradeCancelled);
 
   // Auto-refresh when analyzing
   useEffect(() => {
@@ -127,16 +157,60 @@ export default function Dashboard() {
 
   const hasMetrics = metrics.conversionRate > 0;
 
+  const canStartAnalysis = billing.canAnalyze && !isAnalyzing;
+
   return (
     <Page
       title="ConversionAI Dashboard"
       primaryAction={{
         content: isAnalyzing ? "Analyzing..." : "Run New Analysis",
         url: "/app/analysis/start",
-        disabled: isAnalyzing,
+        disabled: !canStartAnalysis,
       }}
+      secondaryActions={[
+        {
+          content: "Upgrade Plan",
+          url: "/app/upgrade",
+        },
+      ]}
     >
       <BlockStack gap="500">
+        {/* Upgrade success banner */}
+        {showUpgradeBanner && (
+          <Banner
+            title="Successfully upgraded!"
+            tone="success"
+            onDismiss={() => setShowUpgradeBanner(false)}
+          >
+            <p>Your plan has been upgraded. Enjoy your new features!</p>
+          </Banner>
+        )}
+
+        {/* Upgrade cancelled banner */}
+        {showCancelledBanner && (
+          <Banner
+            title="Upgrade cancelled"
+            tone="warning"
+            onDismiss={() => setShowCancelledBanner(false)}
+          >
+            <p>Your upgrade was cancelled. You can try again anytime.</p>
+          </Banner>
+        )}
+
+        {/* Billing limit reached banner */}
+        {!billing.canAnalyze && !isAnalyzing && (
+          <Banner
+            title="Monthly analysis limit reached"
+            tone="warning"
+            action={{ content: "Upgrade Plan", url: "/app/upgrade" }}
+          >
+            <p>
+              You&apos;ve used {billing.analysisUsed} of {billing.analysisLimit} analyses this month.
+              Upgrade to run more analyses.
+            </p>
+          </Banner>
+        )}
+
         {!shop.lastAnalysis && !isAnalyzing && (
           <Banner
             title="Welcome to ConversionAI!"
@@ -215,15 +289,20 @@ export default function Dashboard() {
             <Card>
               <Box padding="400">
                 <BlockStack gap="400">
-                  <Text as="h2" variant="headingMd">
-                    Your Store
-                  </Text>
+                  <InlineStack align="space-between">
+                    <Text as="h2" variant="headingMd">
+                      Your Store
+                    </Text>
+                    <Badge tone={shop.plan === "free" ? "info" : "success"}>
+                      {shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)}
+                    </Badge>
+                  </InlineStack>
                   <BlockStack gap="200">
                     <Text as="p" variant="bodyMd">
                       {shop.domain}
                     </Text>
                     <Text as="p" variant="bodySm" tone="subdued">
-                      Plan: {shop.plan.charAt(0).toUpperCase() + shop.plan.slice(1)}
+                      Analyses: {billing.analysisUsed}/{billing.analysisLimit >= 999 ? "∞" : billing.analysisLimit} this month
                     </Text>
                     {shop.lastAnalysis && (
                       <Text as="p" variant="bodySm" tone="subdued">
@@ -235,6 +314,11 @@ export default function Dashboard() {
                       <Text as="p" variant="bodySm" tone="subdued">
                         Goal: {shop.primaryGoal}
                       </Text>
+                    )}
+                    {shop.plan === "free" && (
+                      <Button url="/app/upgrade" variant="plain" size="slim">
+                        Upgrade for more features
+                      </Button>
                     )}
                   </BlockStack>
                 </BlockStack>
