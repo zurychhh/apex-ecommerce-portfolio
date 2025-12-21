@@ -38,15 +38,22 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
+      - name: Deploy to Railway via GraphQL API
+        run: |
+          RESPONSE=$(curl -s -X POST https://backboard.railway.app/graphql/v2 \
+            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query": "mutation { serviceInstanceDeploy(serviceId: \"08837d5d-0ed5-4332-882e-51d00b61eee6\", environmentId: \"6fd2892b-9846-4e7b-bf9a-dafef8bc1c4e\", latestCommit: true) }"}')
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"serviceInstanceDeploy":true'; then
+            echo "✅ Deployment triggered successfully"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
 
-      - name: Deploy to Railway
-        run: railway up --service conversionai-web --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-
-      - name: Run database migrations
-        run: railway run npx prisma migrate deploy
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      - name: Wait for deployment to complete
+        run: |
+          echo "Waiting 60 seconds for deployment to start..."
+          sleep 60
+          echo "Deployment should be in progress on Railway"
