@@ -400,6 +400,30 @@ Ready for compounding or new session.
 - Dashboard: https://railway.app/project/c1ad5a4a-a4ff-4698-bf0f-e1f950623869
 - GraphQL API: https://backboard.railway.app/graphql/v2
 
+**Railway IDs (for API calls)**:
+```
+Project ID: c1ad5a4a-a4ff-4698-bf0f-e1f950623869
+Environment ID (production): 6fd2892b-9846-4e7b-bf9a-dafef8bc1c4e
+Service ID (conversionai-web): 08837d5d-0ed5-4332-882e-51d00b61eee6
+Working Token: d89e435b-d16d-4614-aa16-6b63cf54e86b
+Root Directory: apps/app-01-conversionai
+```
+
+**Railway API Examples**:
+```bash
+# Deploy latest commit
+curl -X POST https://backboard.railway.app/graphql/v2 \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "mutation { serviceInstanceDeploy(serviceId: \"08837d5d-0ed5-4332-882e-51d00b61eee6\", environmentId: \"6fd2892b-9846-4e7b-bf9a-dafef8bc1c4e\", latestCommit: true) }"}'
+
+# Set environment variable
+curl -X POST https://backboard.railway.app/graphql/v2 \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "mutation { variableUpsert(input: { projectId: \"c1ad5a4a-a4ff-4698-bf0f-e1f950623869\", environmentId: \"6fd2892b-9846-4e7b-bf9a-dafef8bc1c4e\", serviceId: \"08837d5d-0ed5-4332-882e-51d00b61eee6\", name: \"VAR_NAME\", value: \"VAR_VALUE\" }) }"}'
+```
+
 **Shopify**:
 - Partner Dashboard: https://partners.shopify.com/4661608/apps/7638204481584
 - Dev Docs: https://shopify.dev/docs/apps
