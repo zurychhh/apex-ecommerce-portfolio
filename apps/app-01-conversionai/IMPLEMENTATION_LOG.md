@@ -121,6 +121,32 @@ GraphQL API: https://backboard.railway.app/graphql/v2
 
 ---
 
+### [2025-12-21 16:30] - APEX Framework Documentation
+**Status**: ✅ DONE
+
+**Pliki utworzone**:
+- `APEX_TESTING_FRAMEWORK.md` (root) - Comprehensive Playwright MCP testing guide
+- `IMPLEMENTATION_LOG_TEMPLATE.md` (root) - Template for new app implementation logs
+- `docs/integrations-playbook.md` - Railway, Shopify, GitHub automation scripts
+- `apps/app-01-conversionai/RAILWAY_DEBUG_STATUS.md` - Railway API reference & commands
+
+**Pliki zaktualizowane**:
+- `APEX_FRAMEWORK.md` → v1.1.0 - Added automation evolution section
+- `docs/lessons-learned.md` - Added ConversionAI infrastructure learnings
+- `APEX_PROJECT_STATUS.md` - Updated with session #7 progress
+
+**Co zrobiono**:
+- Stworzono kompletny framework testowy dla całego portfolio APEX
+- Udokumentowano wszystkie procedury automatyzacji (Railway API, Shopify CLI, GitHub Actions)
+- Przygotowano szablony dla przyszłych aplikacji
+- Zapisano lekcje wyniesione z App #1
+
+**Commits**:
+- `feat: Add E2E testing framework with Playwright MCP`
+- `docs: Add APEX framework documentation and templates`
+
+---
+
 ## Current State
 
 **Co działa**:
@@ -134,12 +160,28 @@ GraphQL API: https://backboard.railway.app/graphql/v2
 - ✅ Redis queue (on Railway)
 - ✅ Cron endpoint tested and working
 - ✅ E2E testing framework (Playwright MCP)
+- ✅ APEX framework documentation complete
+- ✅ Automation playbook for future apps
 
 **Do zrobienia (ręcznie przez użytkownika)**:
 - ⏳ Utworzenie konta na cron-job.org i konfiguracja crona
 - ⏳ Wykonanie testów E2E na dev store
 
 **Production URL**: https://conversionai-web-production.up.railway.app
+
+---
+
+## Documentation Map
+
+| Plik | Opis | Kiedy używać |
+|------|------|--------------|
+| `APEX_PROJECT_STATUS.md` | Status całego portfolio | Przegląd postępu, co zostało zrobione |
+| `IMPLEMENTATION_LOG.md` | Szczegóły techniczne App #1 | Na początku każdej sesji Claude Code |
+| `APEX_FRAMEWORK.md` | Framework guidelines | Przed rozpoczęciem nowej aplikacji |
+| `APEX_TESTING_FRAMEWORK.md` | E2E testing guide | Przy testowaniu aplikacji |
+| `docs/integrations-playbook.md` | Automation scripts | Setup nowej aplikacji |
+| `docs/lessons-learned.md` | Lekcje z poprzednich apps | Unikanie powtarzania błędów |
+| `RAILWAY_DEBUG_STATUS.md` | Railway API reference | Debugging Railway issues |
 
 ---
 
