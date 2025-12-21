@@ -162,23 +162,21 @@ Prefix with app slug:
 
 ## 🚀 Development Workflow
 
-### Step 1: Initialize New App (10 min)
+### Step 1: Initialize New App (10 min) → **AUTOMATED**
+
 ```bash
-# 1. Copy template
-cp -r templates/shopify-remix-app apps/app-XX-nazwa
+# Używaj Integrations Playbook (docs/integrations-playbook.md)
+# Claude Code automatycznie:
 
-# 2. Update PROJECT_BRIEF.md
-cd apps/app-XX-nazwa
-# Edit PROJECT_BRIEF.md
+# 1. Tworzy Railway projekt z PostgreSQL + Redis
+# 2. Konfiguruje zmienne środowiskowe
+# 3. Tworzy domenę produkcyjną
+# 4. Generuje GitHub Actions workflow
+# 5. Ustawia RAILWAY_TOKEN w GitHub Secrets
+# 6. Konfiguruje Shopify app via CLI
 
-# 3. Install dependencies
-npm install
-
-# 4. Setup database
-npx prisma migrate dev
-
-# 5. Start dev server
-npm run dev
+# Manual step (jedyny):
+# Utwórz app w Shopify Partner Dashboard → podaj client_id
 ```
 
 ### Step 2: Build MVP (2-4 weeks)
@@ -189,15 +187,74 @@ Week 3: UI polish + error handling
 Week 4: Documentation + beta testing
 ```
 
-### Step 3: Deploy (1 day)
+### Step 3: Deploy (AUTOMATIC)
 ```bash
-# Deploy to Fly.io
-flyctl launch
-flyctl deploy
+# Push to main branch triggers:
+# 1. GitHub Actions workflow
+# 2. Build & test
+# 3. Railway deployment
+# 4. Database migrations
 
-# Submit to Shopify App Store
-# (Follow apps/app-XX-nazwa/DEPLOYMENT.md)
+git push origin main  # That's it!
 ```
+
+---
+
+## 🤖 Automation Evolution
+
+### Cel: Zero-Touch App Creation
+
+Z każdą aplikacją automatyzujemy więcej kroków:
+
+| App # | Manual Steps | Automated Steps | Time Saved |
+|-------|--------------|-----------------|------------|
+| App 1 | 8 | 6 | Baseline |
+| App 2 | 4 | 10 | 50% |
+| App 3 | 2 | 12 | 75% |
+| App 4+ | 1* | 13 | 90% |
+
+*Jedyny manual step: utworzenie app w Shopify Partner Dashboard (wymagane przez Shopify)
+
+### Automation Levels
+
+```
+Level 1 (App 1): API calls + CLI commands (current)
+├── Railway: GraphQL API automation
+├── GitHub: gh CLI for secrets
+├── Shopify: CLI deploy
+└── Database: prisma db push
+
+Level 2 (App 2-3): Single setup script
+├── ./scripts/setup-new-app.sh <name> <number>
+├── Automatic template copy
+├── Pre-configured CI/CD
+└── Environment detection
+
+Level 3 (App 4+): Generator/Template
+├── Interactive CLI wizard
+├── Auto-detect tech stack
+├── Pre-built components selection
+└── One-command full setup
+
+Level 4 (Future): AI-Assisted Creation
+├── "Create an app that does X"
+├── Claude generates PROJECT_BRIEF
+├── Auto-scaffolding based on requirements
+└── Deploy-ready in minutes
+```
+
+### Integrations Playbook
+
+Wszystkie procedury automatyzacji są udokumentowane w:
+**`docs/integrations-playbook.md`**
+
+Zawiera:
+- Railway API scripts
+- Shopify CLI automation
+- GitHub Actions templates
+- Claude AI integration patterns
+- Resend email setup
+- Prisma base schema
 
 ---
 
@@ -220,14 +277,21 @@ flyctl deploy
 
 ## 🎓 Lessons Learned (Update After Each App)
 
-### What Worked
-- [Add after app #1 launch]
+### What Worked (App #1: ConversionAI)
+- Railway GraphQL API pozwala na pełną automatyzację infrastruktury
+- Shopify CLI `deploy --force` aktualizuje konfigurację bez interakcji
+- GitHub `gh secret set` działa bez problemów
+- Prisma `db push` wystarczy dla initial setup (bez migracji)
 
-### What Didn't
-- [Add after app #1 launch]
+### What Didn't (App #1: ConversionAI)
+- Railway CLI wymaga interaktywnego logowania (używaj API zamiast CLI)
+- Shopify Partner API nie pozwala na tworzenie apps (tylko Partner Dashboard)
+- Expect scripts są niestabilne (Shopify CLI prompty się zmieniają)
 
 ### Next Time Do This
-- [Add after app #1 launch]
+- Używaj Railway GraphQL API od razu (nie CLI)
+- Przygotuj client_id z Partner Dashboard przed automatyzacją
+- Użyj `shopify app deploy --force` zamiast prób automatyzacji promptów
 
 ---
 
@@ -285,7 +349,13 @@ flyctl deploy
 
 Track framework improvements:
 - v1.0.0 (2025-01-20): Initial version
-- v1.1.0 (TBD): After app #1 launch
+- v1.1.0 (2025-12-19): **App #1 Infrastructure Complete**
+  - Added: Automation Evolution section
+  - Added: Integrations Playbook (docs/integrations-playbook.md)
+  - Added: Railway GraphQL API automation
+  - Added: GitHub Actions CI/CD template
+  - Added: Shopify CLI automation patterns
+  - Updated: Lessons Learned with real experience
 - v1.2.0 (TBD): After app #2 launch
 
 ---

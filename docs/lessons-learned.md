@@ -53,21 +53,49 @@ This document tracks insights from building each app in the APEX portfolio.
 
 ## Apps
 
-### App #1: [TBD]
-[To be filled after first app launch]
+### App #1: ConversionAI
 
-**Launch Date**: TBD
-**Status**: 🟡 Planning
+**Launch Date**: TBD (Infrastructure Ready: 2025-12-19)
+**Status**: 🟢 Infrastructure Complete - Ready for Development
+**MRR Goal**: $10K-15K Year 1
 
-**Ideas**:
-- Consider: Product sync, inventory management, email automation, analytics dashboard, etc.
-- Market research needed
-- Fill out PROJECT_BRIEF.md when ready
+**What Worked**:
+- Railway GraphQL API - pełna automatyzacja infrastruktury bez interakcji
+- Shopify CLI `deploy --force` - aktualizuje konfigurację automatycznie
+- GitHub `gh secret set` - ustawia secrets bez problemów
+- Prisma `db push` - sync schematu do produkcji bez migracji
 
-**Planned Features**:
-- [Feature 1]
-- [Feature 2]
-- [Feature 3]
+**What Didn't**:
+- Railway CLI - wymaga interaktywnego logowania (rozwiązanie: użyj API)
+- Shopify Partner API - nie można tworzyć apps (rozwiązanie: manual w Dashboard)
+- Expect scripts dla Shopify CLI - niestabilne, prompty się zmieniają
+
+**Solutions/Workarounds**:
+- Railway: Używaj GraphQL API z Bearer token zamiast CLI
+- Shopify: Utwórz app ręcznie, resztę automatyzuj przez CLI
+- Database: `prisma db push` dla initial setup, migracje dla zmian
+
+**Next Time**:
+- Od razu używaj Railway GraphQL API
+- Przygotuj client_id przed automatyzacją
+- Użyj `shopify app deploy --force` bez prób automatyzacji promptów
+
+**Metrics**:
+- Time to Infrastructure: 1 session (~2 hours)
+- Automated Steps: 13/14 (93%)
+- Manual Steps: 1 (Shopify app creation)
+
+**Technical Decisions**:
+- Railway over Fly.io: All-in-one (app + PostgreSQL + Redis)
+- Resend over SendGrid: Simpler API, generous free tier
+- Claude Sonnet 4.5: Best quality/cost ratio for CRO recommendations
+
+**Infrastructure Created**:
+- Railway Project: `c1ad5a4a-a4ff-4698-bf0f-e1f950623869`
+- PostgreSQL: `turntable.proxy.rlwy.net:50904`
+- Redis: `mainline.proxy.rlwy.net:43368`
+- Domain: `conversionai-web-production.up.railway.app`
+- Shopify App: `client_id: 30c5af756ea767c28f82092b98ffc9e1`
 
 ---
 
