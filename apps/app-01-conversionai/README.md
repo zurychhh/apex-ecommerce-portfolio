@@ -255,19 +255,23 @@ Add to Railway (via Dashboard):
 Railway doesn't have built-in cron scheduling, so use an external service:
 
 **Option A: cron-job.org (Recommended)**
-1. Go to https://console.cron-job.org
-2. Create account
-3. Create new cron job:
-   - **Title**: ConversionAI Weekly Refresh
-   - **URL**: `https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh`
-   - **Schedule**: `0 9 * * 1` (Every Monday at 9 AM UTC)
-   - **HTTP Method**: POST
-   - **Headers**:
-     ```
-     Authorization: Bearer <CRON_SECRET>
-     Content-Type: application/json
-     ```
-4. Save and test
+
+1. Go to https://console.cron-job.org and create account
+2. Click "Create cronjob" and configure:
+
+| Setting | Value |
+|---------|-------|
+| **Title** | ConversionAI Weekly Refresh |
+| **URL** | `https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh` |
+| **Schedule** | Custom: `0 9 * * 1` (Every Monday at 9 AM UTC) |
+| **Request Method** | POST |
+| **Request Header** | `Authorization: Bearer VZW3SdReDbvhFuVAJ9uXJXRTKSnubP/uTjw/3SS9mmY=` |
+| **Request Header** | `Content-Type: application/json` |
+| **Success status codes** | 200 |
+| **Notify on failure** | Email |
+
+3. Click "Create" and then "Test Run" to verify
+4. Check Railway logs for execution confirmation
 
 **Option B: EasyCron**
 Similar setup at https://www.easycron.com
@@ -363,11 +367,35 @@ curl -X POST \
 
 ## Testing
 
+### E2E Testing with Playwright MCP
+
+ConversionAI uses Playwright MCP + Claude Code for zero-code E2E testing.
+
+**Setup**:
+1. Ensure Claude Code/Desktop has Playwright MCP configured (see `.mcp.json`)
+2. Open `tests/E2E_TESTS.md` for test definitions
+3. Copy test prompt to Claude
+4. Claude executes test in browser automatically
+5. Review results in `tests/RESULTS.md`
+
+**Critical Path Tests**:
+| Test | Description | Priority |
+|------|-------------|----------|
+| CAI-CP-01 | OAuth Installation | Critical |
+| CAI-CP-02 | Dashboard Load | Critical |
+| CAI-CP-03 | AI Analysis Trigger | Critical |
+| CAI-CP-04 | Recommendation Modal | Critical |
+| CAI-CP-05 | Billing Upgrade Flow | Critical |
+
+All Critical Path tests must pass before production deployment.
+
+### Manual Testing Checklist
+
 ```bash
-# Run tests (when implemented)
+# Run unit tests
 npm test
 
-# Manual testing checklist
+# Manual verification
 - [ ] Install app in development store
 - [ ] Complete onboarding flow
 - [ ] Trigger analysis

@@ -69,6 +69,58 @@ GraphQL API: https://backboard.railway.app/graphql/v2
 
 ---
 
+### [2025-12-21 15:00] - Cron-job.org Documentation
+**Status**: ✅ DONE
+
+**Pliki zmienione**:
+- `README.md` (modified) - added detailed cron-job.org configuration table
+
+**Co zrobiono**:
+- Udokumentowano pełną konfigurację cron-job.org z wartościami
+- Dodano tabelę z ustawieniami (URL, schedule, headers, etc.)
+- Cron-job.org wymaga ręcznej konfiguracji przez użytkownika
+
+**Cron-job.org Configuration**:
+| Setting | Value |
+|---------|-------|
+| Title | ConversionAI Weekly Refresh |
+| URL | `https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh` |
+| Schedule | `0 9 * * 1` (Monday 9 AM UTC) |
+| Method | POST |
+| Header | `Authorization: Bearer VZW3SdReDbvhFuVAJ9uXJXRTKSnubP/uTjw/3SS9mmY=` |
+
+---
+
+### [2025-12-21 15:15] - E2E Testing Framework Setup
+**Status**: ✅ DONE
+
+**Pliki utworzone**:
+- `.mcp.json` (created) - Playwright MCP configuration
+- `tests/E2E_TESTS.md` (created) - 5 Critical Path test definitions
+- `tests/RESULTS.md` (created) - test results template
+
+**Pliki zmienione**:
+- `README.md` (modified) - added E2E testing section
+
+**Co zrobiono**:
+- Zintegrowano Playwright MCP dla zero-code E2E testing
+- Zdefiniowano 5 testów Critical Path:
+  - CAI-CP-01: OAuth Installation
+  - CAI-CP-02: Dashboard Load
+  - CAI-CP-03: AI Analysis Trigger
+  - CAI-CP-04: Recommendation Detail Modal
+  - CAI-CP-05: Billing Upgrade Flow
+- Przygotowano prompty Playwright MCP dla każdego testu
+- Utworzono szablon wyników testów
+
+**Framework Features**:
+- Zero-code testing via Playwright MCP
+- Portable prompts (copy-paste to Claude)
+- Screenshot capture at each step
+- Structured results tracking
+
+---
+
 ## Current State
 
 **Co działa**:
@@ -76,14 +128,16 @@ GraphQL API: https://backboard.railway.app/graphql/v2
 - ✅ GitHub Actions CI/CD pipeline
 - ✅ All API routes (`/api/cron/weekly-refresh`, `/api/billing/*`, `/api/analysis/*`)
 - ✅ Shopify OAuth flow
-- ✅ Billing integration
+- ✅ Billing integration (Free, Basic, Pro, Enterprise)
 - ✅ Email notifications (Resend)
 - ✅ Database (PostgreSQL on Railway)
 - ✅ Redis queue (on Railway)
+- ✅ Cron endpoint tested and working
+- ✅ E2E testing framework (Playwright MCP)
 
-**Co NIE działa / Do zrobienia**:
-- ⏳ External cron service (cron-job.org) - needs configuration
-- ⏳ E2E testing on dev store
+**Do zrobienia (ręcznie przez użytkownika)**:
+- ⏳ Utworzenie konta na cron-job.org i konfiguracja crona
+- ⏳ Wykonanie testów E2E na dev store
 
 **Production URL**: https://conversionai-web-production.up.railway.app
 
@@ -91,16 +145,20 @@ GraphQL API: https://backboard.railway.app/graphql/v2
 
 ## Next Session TODO
 
-1. **Konfiguracja cron-job.org**:
-   - URL: `https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh`
-   - Schedule: `0 9 * * 1` (Monday 9 AM UTC)
-   - Headers: `Authorization: Bearer VZW3SdReDbvhFuVAJ9uXJXRTKSnubP/uTjw/3SS9mmY=`
+1. **Ręczna konfiguracja cron-job.org**:
+   - Utwórz konto na https://console.cron-job.org
+   - Skonfiguruj cron według tabeli w README.md
+   - Przetestuj wykonanie ("Test Run")
 
-2. **E2E Testing**:
-   - Install app on dev store via OAuth
-   - Test analysis flow
-   - Test billing flow
-   - Verify email notifications
+2. **Wykonanie testów E2E**:
+   - Użyj promptów z `tests/E2E_TESTS.md`
+   - Wykonaj testy CP-01 przez CP-05
+   - Zapisz wyniki w `tests/RESULTS.md`
+
+3. **Beta Testing**:
+   - Zaproś pierwszych beta testerów
+   - Zbierz feedback
+   - Napraw znalezione bugi
 
 ---
 
