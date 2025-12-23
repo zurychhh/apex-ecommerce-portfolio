@@ -64,7 +64,7 @@ const shopify = shopifyApp({
     },
   },
   future: {
-    unstable_newEmbeddedAuthStrategy: true,
+    unstable_newEmbeddedAuthStrategy: false,  // Disabled to fix iframe loading
     wrapBillingPageChargeRoute: true,
   },
   ...(process.env.SHOP_CUSTOM_DOMAIN
