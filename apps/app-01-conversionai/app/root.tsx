@@ -5,15 +5,18 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import "@shopify/polaris/build/esm/styles.css";
 import { addDocumentResponseHeaders } from "./shopify.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await addDocumentResponseHeaders(request);
   return json({});
 }
+
+export const headers: HeadersFunction = (headersArgs) => {
+  return addDocumentResponseHeaders(headersArgs.request, new Headers());
+};
 
 export default function App() {
   return (

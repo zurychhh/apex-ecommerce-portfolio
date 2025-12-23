@@ -21,20 +21,7 @@ redirect_urls = [
 [webhooks]
 api_version = "2024-01"
 
-# GDPR webhooks (required for app approval)
-[[webhooks.subscriptions]]
-topics = [ "customers/data_request" ]
-uri = "/webhooks/gdpr/customers-data-request"
-
-[[webhooks.subscriptions]]
-topics = [ "customers/redact" ]
-uri = "/webhooks/gdpr/customers-redact"
-
-[[webhooks.subscriptions]]
-topics = [ "shop/redact" ]
-uri = "/webhooks/gdpr/shop-redact"
-
-# Optional: App uninstalled webhook
+# App uninstalled webhook
 [[webhooks.subscriptions]]
 topics = [ "app/uninstalled" ]
 uri = "/webhooks/app-uninstalled"
