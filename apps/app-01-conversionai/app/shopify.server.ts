@@ -22,6 +22,7 @@ const shopify = shopifyApp({
   authPathPrefix: "/auth",
   sessionStorage: new PrismaSessionStorage(),
   distribution: AppDistribution.AppStore,
+  isEmbeddedApp: true,
   webhooks: {
     APP_UNINSTALLED: {
       deliveryMethod: DeliveryMethod.Http,
@@ -64,7 +65,7 @@ const shopify = shopifyApp({
     },
   },
   future: {
-    unstable_newEmbeddedAuthStrategy: false,  // Disabled to fix iframe loading
+    unstable_newEmbeddedAuthStrategy: true,  // Required for embedded app token exchange
     wrapBillingPageChargeRoute: true,
   },
   ...(process.env.SHOP_CUSTOM_DOMAIN
