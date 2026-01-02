@@ -11,7 +11,23 @@ import { authenticate } from "../shopify.server";
  * The @shopify/shopify-app-remix package handles the OAuth flow automatically.
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  const url = new URL(request.url);
+  console.log("[AUTH] Request to:", url.pathname, url.search);
+  console.log("[AUTH] Headers:", JSON.stringify(Object.fromEntries(request.headers.entries())));
 
-  return null;
+  try {
+    await authenticate.admin(request);
+    console.log("[AUTH] Authentication successful");
+    return null;
+  } catch (error) {
+    // Check if this is a Response (redirect) - which is normal flow
+    if (error instanceof Response) {
+      console.log("[AUTH] Redirect response:", error.status, error.headers.get("Location"));
+      throw error; // Re-throw redirect responses
+    }
+    // Log actual errors
+    console.error("[AUTH] Error:", error);
+    console.error("[AUTH] Error stack:", error instanceof Error ? error.stack : "no stack");
+    throw error;
+  }
 };
