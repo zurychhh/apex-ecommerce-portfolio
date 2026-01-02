@@ -1,27 +1,115 @@
 # APEX eCommerce Portfolio - Project Status
 
-**Last Updated**: 2025-12-21 17:00 UTC
+**Last Updated**: 2026-01-02 13:15 UTC
 
 ---
 
 ## Active App: ConversionAI (App #1)
 
-### Overall Progress: 98% MVP Complete
+### Overall Progress: 95% MVP Complete
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Week 1 - Foundation | ✅ Complete | 100% |
 | Week 2 - Features | ✅ Complete | 100% |
-| Week 3 - Polish & Deploy | 🟡 In Progress | 95% |
+| Week 3 - Polish & Deploy | 🔴 BLOCKED | 95% |
 
-**Remaining for 100%**: Manual cron-job.org setup + E2E test execution
+**BLOCKER**: App returns HTTP 500 when loading in Shopify Admin iframe
+
+**Testing Status**:
+- ✅ Unit Tests: 108/108 PASS (100%)
+- ✅ API Health Checks: 5/5 PASS (100%)
+- ✅ Code Coverage: 83.2% statements, 84.2% branches, 80% functions
+- ❌ Browser E2E Tests: BLOCKED - HTTP 500 error in iframe
+
+---
+
+## 🔴 CURRENT BLOCKER: HTTP 500 in Browser Context
+
+### Problem
+When app loads in Shopify Admin iframe, it returns HTTP 500 "Unexpected Server Error".
+- `curl` requests return 410 (expected)
+- Browser requests return 500 (unexpected server crash)
+
+### What Was Tried (Session #10)
+1. ❌ Added `auth.login` route - Still 500
+2. ✅ Added error logging to `auth.$.tsx` - Deployed, waiting for logs
+3. ✅ Set up Chrome DevTools + Puppeteer for browser debugging
+
+### Next Steps
+1. Check Railway logs for `[AUTH]` entries
+2. Identify actual error from logs
+3. Fix based on root cause
+
+### Detailed Info
+See `apps/app-01-conversionai/IMPLEMENTATION_LOG.md` Session #10
 
 ---
 
 ## Session History
 
+### Session #10 (2026-01-02)
+**Duration**: ~1h
+**Focus**: Deep debugging of HTTP 500 error in iframe
+
+**Completed**:
+- ✅ Set up Chrome DevTools MCP for browser debugging
+- ✅ Launched Chrome with remote debugging port 9222
+- ✅ Created Puppeteer scripts for error capture
+- ✅ Confirmed HTTP 500 from browser vs 410 from curl
+- ✅ Added `auth.login` route (didn't fix)
+- ✅ Added error logging to `auth.$.tsx`
+- ✅ Committed and deployed changes
+
+**Files Created**:
+- `app/routes/auth.login/route.tsx` - Login route with `login()` function
+
+**Files Modified**:
+- `app/routes/auth.$.tsx` - Added try/catch error logging
+
+**Commits**:
+- `feat: Add missing auth.login route` - 4a0e552
+- `debug: Add error logging to auth route` - 4e085f5
+
+**Blocked**: HTTP 500 still occurring, need to check Railway logs for actual error
+
+---
+
+### Session #9 (2025-12-23)
+**Duration**: ~2h
+**Focus**: Iframe "Connection refused" fix
+
+**Completed**:
+- ✅ Fixed Shopify Partners Dashboard sync
+- ✅ Deployed app version `conversionai-10`
+- ✅ Verified CSP headers working
+
+**Result**: Fixed "connection refused" but revealed HTTP 500 issue
+
+---
+
+### Session #8 (2025-12-21)
+**Duration**: ~1h
+**Focus**: Complete Testing Suite (Unit + E2E + API)
+
+**Completed**:
+- ✅ Set up Jest testing framework with ts-jest
+- ✅ Wrote 108 unit tests (billing, claude, email utilities)
+- ✅ All unit tests passing (108/108 = 100%)
+- ✅ Executed 5 API Health Checks - **ALL PASS**
+- ✅ Generated comprehensive test coverage report
+
+**Test Coverage**:
+| File | Statements | Branches | Functions |
+|------|------------|----------|-----------|
+| billing.server.ts | 100% | 100% | 100% |
+| claude.server.ts | 55.31% | 73.91% | 60% |
+| email.server.ts | 100% | 100% | 100% |
+| **Total** | **83.2%** | **84.21%** | **80%** |
+
+---
+
 ### Session #7 (2025-12-21)
-**Duration**: ~3h
 **Focus**: Railway deployment fix, cron configuration, E2E testing framework, documentation
 
 **Completed**:
@@ -29,49 +117,7 @@
 - ✅ Connected Railway service to GitHub repo
 - ✅ Set monorepo rootDirectory (`apps/app-01-conversionai`)
 - ✅ Verified cron endpoint working
-- ✅ Created IMPLEMENTATION_LOG.md
-- ✅ Created APEX_PROJECT_STATUS.md
-- ✅ Documented cron-job.org configuration in README
-- ✅ Created E2E testing framework:
-  - `.mcp.json` - Playwright MCP config
-  - `tests/E2E_TESTS.md` - 5 Critical Path tests
-  - `tests/RESULTS.md` - Results template
-- ✅ Updated README with E2E testing section
-- ✅ Created APEX framework documentation:
-  - `APEX_TESTING_FRAMEWORK.md` - Playwright MCP testing guide
-  - `IMPLEMENTATION_LOG_TEMPLATE.md` - Template for new apps
-  - `docs/integrations-playbook.md` - Railway/Shopify/GitHub automation
-  - `RAILWAY_DEBUG_STATUS.md` - Railway API reference
-- ✅ Updated `APEX_FRAMEWORK.md` to v1.1.0
-- ✅ Updated `docs/lessons-learned.md` with App #1 learnings
-
-**Blocked**: None
-
-**Manual Steps Required**:
-1. Create cron-job.org account and configure cron
-2. Execute E2E tests using Playwright MCP prompts
-
----
-
-### Session #6 (2025-12-20)
-**Focus**: Billing integration, cron endpoint, documentation
-
-**Completed**:
-- ✅ Shopify Billing API integration (4 plans: Free, Basic, Pro, Enterprise)
-- ✅ Weekly cron endpoint for Pro/Enterprise auto-refresh
-- ✅ Email notifications via Resend
-- ✅ Added CRON_SECRET to Railway
-- ✅ Updated README with cron documentation
-
----
-
-### Session #5 (2025-12-19)
-**Focus**: Railway deployment, infrastructure setup
-
-**Completed**:
-- ✅ Railway project setup (PostgreSQL, Redis, Web service)
-- ✅ Environment variables configuration
-- ✅ Initial deployment
+- ✅ Created E2E testing framework documentation
 
 ---
 
@@ -110,9 +156,12 @@
 - [x] Weekly auto-refresh (cron endpoint)
 - [x] E2E testing framework (Playwright MCP)
 - [x] CI/CD pipeline (GitHub Actions)
+- [x] Unit tests (108 passing)
 - [x] Documentation complete
+- [x] E2E API Health Checks executed (5/5 PASS)
+- [ ] **Fix HTTP 500 in iframe** *(BLOCKER)*
 - [ ] External cron service configuration *(manual)*
-- [ ] E2E test execution on dev store *(manual)*
+- [ ] E2E browser tests on dev store *(blocked by HTTP 500)*
 
 ### Post-MVP
 - [ ] Competitor tracking
@@ -130,6 +179,7 @@ Project ID: c1ad5a4a-a4ff-4698-bf0f-e1f950623869
 Environment ID: 6fd2892b-9846-4e7b-bf9a-dafef8bc1c4e
 Service ID: 08837d5d-0ed5-4332-882e-51d00b61eee6
 Root Directory: apps/app-01-conversionai
+Working Token: d89e435b-d16d-4614-aa16-6b63cf54e86b
 ```
 
 ### API Endpoints
@@ -150,14 +200,47 @@ Railway Dashboard: https://railway.app/project/c1ad5a4a-a4ff-4698-bf0f-e1f950623
 
 ---
 
+## Browser Debugging Setup (Session #10)
+
+### Chrome Remote Debugging
+```bash
+# Kill existing Chrome
+pkill -9 "Google Chrome"
+
+# Launch with debugging
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.chrome-debug-profile" \
+  "https://admin.shopify.com/store/conversionai-development/apps"
+
+# Verify
+curl -s http://localhost:9222/json/version
+```
+
+### Puppeteer Script (in /tmp/)
+```bash
+cd /tmp && node capture-error.cjs
+```
+
+### Chrome DevTools MCP
+Installed: `claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest`
+
+---
+
 ## Blockers & Issues
 
-**Current Blockers**: None
+### Current Blocker
+**HTTP 500 in Shopify iframe**
+- Browser requests to `/auth?shop=xxx` return 500
+- curl requests return 410 (expected)
+- Error logging added, need to check Railway logs
 
-**Resolved Issues**:
+### Resolved Issues
 1. ~~Railway CLI "Project Token not found"~~ → Switched to GraphQL API
 2. ~~Routes 404~~ → Set rootDirectory for monorepo
-3. ~~GitHub Actions cache path~~ → Fixed to use root package-lock.json
+3. ~~Partners Dashboard out of sync~~ → `shopify app deploy --force`
+4. ~~CSP headers missing~~ → Created entry.server.tsx
+5. ~~"Connection refused" in iframe~~ → Partners sync fixed
 
 ---
 
@@ -177,19 +260,19 @@ Railway Dashboard: https://railway.app/project/c1ad5a4a-a4ff-4698-bf0f-e1f950623
 
 ## Next Session Priorities
 
-1. **Configure cron-job.org** (15 min)
-   - Create account
-   - Set up weekly POST request
-   - Test execution
+1. **Check Railway Logs** (5 min)
+   - Look for `[AUTH]` log entries
+   - Identify the actual error causing HTTP 500
 
-2. **E2E Testing** (1-2h)
-   - Install app on dev store
-   - Complete onboarding
-   - Trigger analysis
-   - Test billing flow
-   - Verify emails
+2. **Fix Based on Error** (15-60 min)
+   - Database issue → Check Prisma config
+   - Auth package issue → Check shopify.server.ts config
+   - Env var issue → Verify Railway variables
 
-3. **Beta Preparation**
-   - Fix any bugs found in E2E
-   - Performance testing
-   - Documentation review
+3. **Test in Browser** (5 min)
+   - Use puppeteer script to verify fix
+   - Take screenshot of working app
+
+4. **If Fixed - Continue with E2E**
+   - Execute manual browser tests
+   - Configure cron-job.org
