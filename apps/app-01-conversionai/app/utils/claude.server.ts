@@ -128,7 +128,7 @@ export async function callClaudeAPI(
     logger.info(`Sending ${imageContent.length} screenshots to Claude`);
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514', // Claude Sonnet 4
+      model: 'claude-3-5-sonnet-20241022', // Claude 3.5 Sonnet with Vision
       max_tokens: 8000, // Increased for more detailed recommendations
       messages: [
         {
