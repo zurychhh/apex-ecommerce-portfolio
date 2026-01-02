@@ -1,4 +1,6 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs, HeadersFunction } from "@remix-run/node";
+import { useRouteError } from "@remix-run/react";
+import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../shopify.server";
 
 /**
@@ -11,23 +13,22 @@ import { authenticate } from "../shopify.server";
  * The @shopify/shopify-app-remix package handles the OAuth flow automatically.
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  console.log("[AUTH] Request to:", url.pathname, url.search);
-  console.log("[AUTH] Headers:", JSON.stringify(Object.fromEntries(request.headers.entries())));
-
-  try {
-    await authenticate.admin(request);
-    console.log("[AUTH] Authentication successful");
-    return null;
-  } catch (error) {
-    // Check if this is a Response (redirect) - which is normal flow
-    if (error instanceof Response) {
-      console.log("[AUTH] Redirect response:", error.status, error.headers.get("Location"));
-      throw error; // Re-throw redirect responses
-    }
-    // Log actual errors
-    console.error("[AUTH] Error:", error);
-    console.error("[AUTH] Error stack:", error instanceof Error ? error.stack : "no stack");
-    throw error;
-  }
+  await authenticate.admin(request);
+  return null;
 };
+
+/**
+ * Headers export - required for proper iframe handling in embedded apps
+ * Sets correct headers for App Bridge when redirects occur outside the iframe
+ */
+export const headers: HeadersFunction = (headersArgs) => {
+  return boundary.headers(headersArgs);
+};
+
+/**
+ * ErrorBoundary - handles authentication errors in iframe context
+ * Ensures proper redirection during OAuth flow
+ */
+export function ErrorBoundary() {
+  return boundary.error(useRouteError());
+}
