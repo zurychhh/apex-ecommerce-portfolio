@@ -7,6 +7,9 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import { addDocumentResponseHeaders } from "./shopify.server";
 
+// Register Bull queue worker at server startup
+import "./utils/queue.server";
+
 const ABORT_DELAY = 5_000;
 
 export default function handleRequest(
