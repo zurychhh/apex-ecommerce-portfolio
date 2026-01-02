@@ -14,7 +14,7 @@
 
 import { prisma } from '../utils/db.server';
 import { fetchShopifyAnalytics, fetchProducts, fetchCurrentTheme } from '../utils/shopify.server';
-import { captureScreenshots } from './captureScreenshots';
+import { captureScreenshots, type Screenshot } from './captureScreenshots';
 import { callClaudeAPI, buildAnalysisPrompt, parseRecommendations } from '../utils/claude.server';
 import { sendAnalysisCompleteEmail } from '../utils/email.server';
 import { logger } from '../utils/logger.server';
@@ -47,13 +47,15 @@ export async function analyzeStore(data: AnalyzeStoreJobData) {
     logger.info('Fetching theme...');
     const theme = await fetchCurrentTheme(shop);
 
-    // 3. Capture screenshots
-    logger.info('Capturing screenshots...');
-    const screenshots = await captureScreenshots(shopDomain, [
-      '/',
-      `/products/${products[0]?.handle || 'example'}`,
-      '/cart',
-    ]);
+    // 3. Capture screenshots (skip for now - Railway may not have browser)
+    logger.info('Skipping screenshots (Railway compatibility)...');
+    const screenshots: Screenshot[] = [];
+    // TODO: Re-enable when Playwright browsers are configured:
+    // const screenshots = await captureScreenshots(shopDomain, [
+    //   '/',
+    //   `/products/${products[0]?.handle || 'example'}`,
+    //   '/cart',
+    // ]);
 
     // 4. Find competitors (optional, best-effort)
     // TODO: Implement competitor discovery
