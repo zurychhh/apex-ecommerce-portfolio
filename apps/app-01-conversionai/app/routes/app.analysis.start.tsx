@@ -4,7 +4,7 @@ import { Page, Card, Text, Button, Select, Banner } from '@shopify/polaris';
 import { useState } from 'react';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
-import { queueAnalysis } from '../utils/queue.server';
+import { analyzeStore } from '../jobs/analyzeStore';
 import { logger } from '../utils/logger.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -49,17 +49,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       where: { shopId: shop.id },
     });
 
-    // Queue the analysis job
-    const job = await queueAnalysis({
-      shopId: shop.id,
-      shopDomain: shop.domain,
-      primaryGoal,
-    });
+    // Run analysis synchronously (bypassing queue for debugging)
+    logger.info(`Starting synchronous analysis for ${shop.domain} with goal: ${primaryGoal}`);
 
-    logger.info(`Analysis job queued: ${job.id} for ${shop.domain} with goal: ${primaryGoal}`);
+    try {
+      const result = await analyzeStore({
+        shopId: shop.id,
+        shopDomain: shop.domain,
+        primaryGoal,
+      });
 
-    // Redirect to dashboard - analysis will complete in background
-    return redirect('/app?analyzing=true');
+      logger.info(`Analysis completed: ${result.recommendationsCount} recommendations generated`);
+    } catch (analysisError: any) {
+      logger.error('Analysis failed:', analysisError);
+      // Don't throw - still redirect to dashboard
+    }
+
+    // Redirect to dashboard - analysis should be complete now
+    return redirect('/app');
 
   } catch (error: any) {
     logger.error('Failed to start analysis:', error);
