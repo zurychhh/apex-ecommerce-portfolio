@@ -124,13 +124,29 @@ export async function multiStageAnalysis(
   // STAGE 4: Validation & Quality Control
   logger.info("Stage 4: Validating and filtering recommendations...");
   const validated = validateRecommendations(prioritized as any[]);
-  const withConflictCheck = conflictCheck(validated) as Stage3Prioritized[];
 
   // Log validation stats
   const stats = getValidationStats(prioritized as any[], validated);
   logger.info(`Validation stats: ${stats.validatedCount}/${stats.originalCount} passed (filtered ${stats.filterRate})`);
   logger.info(`Average quality score: ${stats.avgQualityScore}/100`);
 
+  // FALLBACK: If validation filtered too many (>80%), use unvalidated with warning
+  if (validated.length === 0 && prioritized.length > 0) {
+    logger.warn(`Validation filtered ALL ${prioritized.length} recommendations - using unvalidated results with quality warnings`);
+
+    // Return prioritized results with low quality flag
+    const fallbackResults = prioritized.map((rec: any, index: number) => ({
+      ...rec,
+      qualityScore: 40, // Low quality indicator
+      warning: "This recommendation may be too generic - review before implementing",
+      implementationOrder: index + 1,
+    }));
+
+    return conflictCheck(fallbackResults) as Stage3Prioritized[];
+  }
+
+  // If validation passed at least some, use validated results
+  const withConflictCheck = conflictCheck(validated) as Stage3Prioritized[];
   return withConflictCheck;
 }
 
@@ -159,11 +175,13 @@ Top Products: ${shopData.topProducts.slice(0, 3).map(p => p.title).join(", ")}
 
 For each problem, provide:
 - id: Unique identifier (e.g., "prob-hero-cta")
-- title: Specific problem (e.g., "Hero CTA invisible on mobile - positioned at 650px")
+- title: MUST include specific measurements (px, %, $) - e.g., "Hero CTA at 650px below fold needs repositioning to 350px"
 - severity: 1-10 (10 = critical blocker)
 - affectedUsers: Percentage and count (e.g., "78% of mobile users = ${Math.round(metrics.monthlyVisitors * metrics.mobilePercentage / 100 * 0.78)}/mo")
 - category: hero|product|cart|mobile|trust|checkout|navigation|speed
-- quickEvidence: One-sentence proof from screenshot analysis
+- quickEvidence: One-sentence proof with numbers
+
+CRITICAL: Every title MUST contain specific numbers (px, %, $, or exact values). Generic titles will be rejected.
 
 Return JSON array of 3-5 problems, sorted by severity DESC:
 [{"id": "...", "title": "...", "severity": 10, "affectedUsers": "...", "category": "...", "quickEvidence": "..."}]`;
@@ -216,10 +234,12 @@ Provide:
 3. psychologyPrinciple: What psychological principle is violated (e.g., "Hick's Law", "Social Proof", "Urgency")
 4. recommendations: Array of 3-4 specific solutions
 
-Each recommendation should have:
-- title: Specific action (with measurements if applicable)
-- specificChange: Exact change to make (with CSS values, pixel measurements, copy)
-- expectedOutcome: Realistic impact with calculation
+Each recommendation MUST have:
+- title: Specific action WITH MEASUREMENTS (px, %, $) - e.g., "Move CTA from 650px to 350px for above-fold visibility"
+- specificChange: Exact change with CSS values (e.g., "Add margin-top: -300px to .hero-cta class")
+- expectedOutcome: Realistic impact with exact numbers (e.g., "+0.5% CR = +${Math.round(metrics.monthlyVisitors * 0.005)} orders/mo")
+
+CRITICAL: Every title MUST contain specific numbers. Generic titles like "improve mobile UX" will be rejected.
 
 Return JSON object:
 {
@@ -283,22 +303,28 @@ Store metrics:
 Recommendations to process:
 ${JSON.stringify(recommendations, null, 2)}
 
-For each recommendation, provide complete enrichment:
+For each recommendation, provide complete enrichment with SPECIFIC MEASUREMENTS:
 
 1. id: Unique ID (rec-001, rec-002, etc.)
-2. title: The recommendation title (specific, actionable)
-3. description: Full explanation (what's wrong, why it matters, what to do) - 3-4 sentences
+2. title: MUST include specific numbers (px, %, $) - e.g., "Reposition hero CTA from 650px to 350px to achieve above-fold visibility"
+3. description: Full explanation with specific numbers - what's wrong (with measurements), why it matters (with %), what to do (with exact values)
 4. impactScore: 1-5 (5 = critical, affects >50% users)
 5. effortScore: 1-5 (1 = 15 min CSS tweak, 5 = 1+ week rebuild)
 6. category: hero|product|cart|checkout|mobile|trust|navigation|speed
-7. estimatedUplift: Specific CR improvement (e.g., "+0.5% CR (${metrics.conversionRate}% → ${(metrics.conversionRate + 0.5).toFixed(1)}%)")
-8. estimatedROI: Monthly revenue (e.g., "+$${Math.round(metrics.monthlyVisitors * 0.005 * metrics.avgOrderValue)}/mo")
-9. implementation: Array of 4-6 specific steps with file names
-10. codeSnippet: Copy-paste ready Liquid/CSS/JS code
+7. estimatedUplift: "+X.X% CR (${metrics.conversionRate}% → Y%)"
+8. estimatedROI: "+$X,XXX/mo based on Y additional orders"
+9. implementation: Array of 4-6 DETAILED steps - each must start with action verb (Edit, Add, Change, Update, Create, Remove, Modify) and include file name where applicable - e.g., "Edit sections/hero.liquid line 47 to modify CTA wrapper position"
+10. codeSnippet: Copy-paste ready Liquid/CSS/JS code (minimum 50 chars)
 11. dependencies: Array of rec IDs that must be done first (or empty)
 12. confidence: 0-100% based on evidence strength
-13. benchmarkComparison: How this compares to industry best practice
-14. reasoning: 1-2 sentences on why this works (psychology/data)
+13. benchmarkComparison: Specific comparison with numbers - e.g., "Current CTA at 650px vs best practice 350px"
+14. reasoning: 1-2 sentences on why this works (cite psychology principle)
+
+CRITICAL RULES - Will be rejected if not followed:
+- EVERY title MUST contain specific numbers (px, %, $)
+- EVERY implementation step MUST start with action verb (Edit, Add, Change, etc.)
+- EVERY implementation step MUST be >20 characters with specific details
+- NO generic phrases like "improve UX", "optimize design", "enhance layout"
 
 Return JSON array of 10-12 recommendations sorted by priority score:
 [
