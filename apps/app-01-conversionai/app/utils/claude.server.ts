@@ -39,14 +39,13 @@ Your expertise:
 - Expert in Shopify Liquid templating, theme customization, and app ecosystem
 
 Your analysis approach:
-1. EVIDENCE-BASED: Every recommendation backed by data and psychology principles
-2. SPECIFIC: Exact pixel measurements, color codes, copy suggestions
-3. PRIORITIZED: Focus on highest-impact, lowest-effort wins first
-4. REALISTIC: ROI estimates based on actual store metrics, not generic averages
-5. ACTIONABLE: Provide copy-paste ready code and step-by-step implementation
+1. EVIDENCE-BASED: Recommendations backed by data and psychology
+2. SPECIFIC: Include measurements (px, %, $) and color codes where relevant
+3. PRIORITIZED: Highest-impact, lowest-effort wins first
+4. REALISTIC: ROI estimates based on actual store metrics
+5. ACTIONABLE: Provide implementation steps
 
-Output format: JSON array of 10-12 recommendations (not 5-7).
-Each recommendation MUST include all fields with high detail.`;
+IMPORTANT: Generate exactly 6-8 recommendations. Keep descriptions concise (2-3 sentences max).`;
 
   // Calculate derived metrics
   const monthlyVisitors = analytics.totalSessions || 10000;
@@ -74,98 +73,24 @@ Each recommendation MUST include all fields with high detail.`;
 ${competitors.length > 0 ? `## Competitors
 ${competitors.map(c => `- ${c.name}: ${c.heroCTA}, ${c.trustBadges}`).join('\n')}` : ''}
 
-## Analysis Instructions
+## Generate 6-8 Recommendations
 
-Analyze the provided screenshots (homepage, product page, cart) and store data.
+Return ONLY valid JSON. Each recommendation needs:
+- **title**: Specific action with measurement (e.g., "Move CTA 120px higher")
+- **description**: 2-3 sentences: what's wrong, why it hurts, what to change
+- **category**: hero | product | cart | checkout | mobile | trust | navigation | speed
+- **impactScore**: 1-5 (5=critical)
+- **effortScore**: 1-5 (1=quick fix)
+- **estimatedUplift**: e.g., "+0.3% CR"
+- **estimatedROI**: e.g., "+$${Math.round(50 * aov)}/mo"
+- **reasoning**: Why this works (1 sentence)
+- **implementation**: 2-3 steps as string
+- **codeSnippet**: Optional CSS/Liquid code (keep short, <10 lines)
 
-Generate 10-12 SPECIFIC, ACTIONABLE recommendations prioritized by:
-**Priority Score = (Impact × Urgency) / Effort**
+## JSON Format (no markdown, no explanation):
+{"recommendations":[{"title":"...","description":"...","category":"hero","impactScore":5,"effortScore":2,"estimatedUplift":"+0.5%","estimatedROI":"+$3750/mo","reasoning":"...","implementation":"1. Edit X\\n2. Add Y","codeSnippet":"..."}]}
 
-For EACH recommendation provide:
-
-1. **title**: Specific action (not "improve mobile UX" but "Reposition CTA 120px higher on mobile")
-2. **description**:
-   - What exactly is wrong (with measurements, data)
-   - Why it hurts conversions (psychology + evidence)
-   - What to change (specific instructions)
-
-3. **impactScore**: 1-5 scale
-   - 5 = Critical (affects >50% of users, major CR blocker)
-   - 4 = High (affects 25-50% users, significant friction)
-   - 3 = Medium (affects 10-25% users, moderate impact)
-   - 2 = Low (affects <10% users, minor improvement)
-   - 1 = Minimal (polish, nice-to-have)
-
-4. **effortScore**: 1-5 scale
-   - 1 = 5-15 minutes (CSS tweak, copy change)
-   - 2 = 30-60 minutes (simple template edit)
-   - 3 = 2-4 hours (multiple file changes)
-   - 4 = 1-2 days (theme customization)
-   - 5 = 1+ week (major rebuild, app integration)
-
-5. **category**: One of: hero | product | cart | checkout | mobile | trust | navigation | speed
-
-6. **estimatedUplift**: Be SPECIFIC based on metrics
-   - Calculate realistic CR improvement percentage
-   - Example: "Current mobile CR 1.2% → projected 1.8% (+0.6%)"
-
-7. **estimatedROI**: Calculate monthly revenue impact
-   - Formula: (New CR - Old CR) × Monthly Traffic × AOV
-   - Example: "+54 orders/mo × $${aov} AOV = +$${Math.round(54 * aov)}/mo"
-   - Show the math in description
-
-8. **implementation**: 3-6 concrete steps with file names
-   - Example: "1. Edit theme.liquid line 47..."
-   - Example: "2. Add CSS to assets/custom.css..."
-
-9. **codeSnippet**: COPY-PASTE READY code
-   - Shopify Liquid for templates
-   - CSS for styling
-   - JavaScript if needed
-   - Include comments explaining what it does
-
-10. **dependencies**: Array of other recommendations that should be done first
-    - Example: ["rec-001-fix-navigation"] if navigation must work first
-
-11. **confidence**: Your confidence in the estimate (%)
-    - 90-100%: Proven pattern, strong data support
-    - 70-89%: Likely works, some assumptions
-    - 50-69%: Hypothesis, needs testing
-    - <50%: Experimental, high variance
-
-12. **benchmarkComparison**: How store compares to industry
-    - Example: "Your hero CTA at 650px, industry best practice <400px"
-    - Example: "Your mobile CR 1.2% vs industry avg 2.1% (-0.9%)"
-
-## Output Format
-
-Return ONLY a JSON object with recommendations array. No markdown, no explanation, just:
-
-{"recommendations": [
-  {
-    "id": "rec-001",
-    "title": "...",
-    "description": "...",
-    "impactScore": 5,
-    "effortScore": 2,
-    "category": "hero",
-    "estimatedUplift": "+0.6% CR (1.8% → 2.4%)",
-    "estimatedROI": "+72 orders/mo × $${aov} = +$${Math.round(72 * aov)}/mo",
-    "implementation": ["...", "..."],
-    "codeSnippet": "...",
-    "dependencies": [],
-    "confidence": 85,
-    "benchmarkComparison": "...",
-    "reasoning": "..."
-  }
-]}
-
-CRITICAL RULES:
-- NO generic advice ("improve UX", "optimize design")
-- EVERY recommendation must be implementable TODAY
-- SHOW YOUR MATH for ROI calculations
-- PRIORITIZE quick wins (high impact, low effort) first
-- BE BRUTALLY HONEST about what's broken
+RULES: Be specific (use px, %, $). No generic advice. Quick wins first.
 `;
 
   return { system: systemPrompt, user: userPrompt };
