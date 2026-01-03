@@ -129,7 +129,7 @@ export async function callClaudeAPI(
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307', // Claude 3 Haiku - fast and cost-effective
-      max_tokens: 8000, // Increased for more detailed recommendations
+      max_tokens: 4096, // Maximum for Haiku model
       messages: [
         {
           role: 'user',
