@@ -24,8 +24,8 @@ import { sendAnalysisCompleteEmail } from '../utils/email.server';
 import { logger } from '../utils/logger.server';
 
 // Feature flag: Use multi-stage analysis for better recommendations
-// TEMPORARILY DISABLED: Multi-stage times out on Railway, using legacy single-shot
-const USE_MULTI_STAGE_ANALYSIS = false;
+// ENABLED: Now using Bull queue for background processing (no timeout issues)
+const USE_MULTI_STAGE_ANALYSIS = true;
 
 export interface AnalyzeStoreJobData {
   shopId: string;

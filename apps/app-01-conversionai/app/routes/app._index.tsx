@@ -128,15 +128,16 @@ export default function Dashboard() {
   useEffect(() => {
     if (!isAnalyzing) return;
 
-    // Progress animation
+    // Progress animation - slower for multi-stage (2-3 min)
+    // Increment by 2% every 4 seconds = 90% in ~180s (3 min)
     const progressInterval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + 5, 90));
-    }, 3000);
+      setProgress((prev) => Math.min(prev + 2, 90));
+    }, 4000);
 
-    // Check for new recommendations every 10 seconds
+    // Check for new recommendations every 15 seconds
     const pollInterval = setInterval(() => {
       revalidator.revalidate();
-    }, 10000);
+    }, 15000);
 
     return () => {
       clearInterval(progressInterval);
@@ -236,8 +237,8 @@ export default function Dashboard() {
                 </InlineStack>
                 <ProgressBar progress={progress} size="small" tone="primary" />
                 <Text as="p" variant="bodyMd" tone="subdued">
-                  This takes 60-90 seconds. We&apos;re fetching your store data,
-                  capturing screenshots, and generating AI recommendations.
+                  This takes 2-3 minutes. We&apos;re running 3-stage deep AI analysis
+                  to generate highly specific recommendations with ROI estimates.
                 </Text>
                 <Text as="p" variant="bodySm" tone="subdued">
                   You can leave this page - we&apos;ll send an email when ready.

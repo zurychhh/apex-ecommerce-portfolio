@@ -4,7 +4,7 @@ import { Page, Card, Text, Button, Select, Banner } from '@shopify/polaris';
 import { useState } from 'react';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
-import { analyzeStore } from '../jobs/analyzeStore';
+import { queueAnalysis } from '../utils/queue.server';
 import { logger } from '../utils/logger.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -49,26 +49,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       where: { shopId: shop.id },
     });
 
-    // Run analysis synchronously (bypassing queue for debugging)
-    logger.info(`Starting synchronous analysis for ${shop.domain} with goal: ${primaryGoal}`);
+    // Queue analysis job (runs in background via Bull/Redis)
+    // This returns immediately, allowing the UI to show progress
+    logger.info(`Queueing analysis for ${shop.domain} with goal: ${primaryGoal}`);
 
     try {
-      const result = await analyzeStore({
+      const job = await queueAnalysis({
         shopId: shop.id,
         shopDomain: shop.domain,
         primaryGoal,
       });
 
-      logger.info(`Analysis completed: ${result.recommendationsCount} recommendations generated`);
+      logger.info(`Analysis job queued: ${job.id} for ${shop.domain}`);
 
-      // Redirect to dashboard with success indicator
-      return redirect('/app?analyzed=true');
-    } catch (analysisError: any) {
-      logger.error('Analysis failed:', analysisError);
-      // Return error to UI so we can debug
+      // Redirect immediately with analyzing=true
+      // Dashboard will poll every 10s until recommendations appear
+      return redirect('/app?analyzing=true');
+    } catch (queueError: any) {
+      logger.error('Failed to queue analysis:', queueError);
       return json({
-        error: `Analysis failed: ${analysisError.message}`,
-        stack: analysisError.stack?.substring(0, 500)
+        error: `Failed to queue analysis: ${queueError.message}`,
+        stack: queueError.stack?.substring(0, 500)
       }, { status: 500 });
     }
 
@@ -164,12 +165,12 @@ export default function StartAnalysis() {
             </Text>
             <ul style={{ marginTop: '12px', paddingLeft: '20px' }}>
               <li><Text as="span" variant="bodyMd">We&apos;ll analyze your store data (analytics, products, theme)</Text></li>
-              <li><Text as="span" variant="bodyMd">Capture screenshots of key pages</Text></li>
+              <li><Text as="span" variant="bodyMd">Run 3-stage deep AI analysis (problems → solutions → priorities)</Text></li>
               <li><Text as="span" variant="bodyMd">Compare with industry benchmarks</Text></li>
-              <li><Text as="span" variant="bodyMd">Generate 10-15 prioritized recommendations</Text></li>
+              <li><Text as="span" variant="bodyMd">Generate 10-12 highly specific recommendations with ROI</Text></li>
             </ul>
             <Text as="p" variant="bodySm" tone="subdued">
-              This process takes 60-90 seconds. You&apos;ll receive an email when it&apos;s complete.
+              This process takes 2-3 minutes. You can leave this page - we&apos;ll send an email when it&apos;s complete.
             </Text>
           </div>
         </div>
