@@ -1,6 +1,5 @@
 # Playwright-enabled Dockerfile for Railway deployment
-# Base image with Playwright pre-installed (includes Chromium)
-FROM mcr.microsoft.com/playwright:v1.40.0-focal
+FROM mcr.microsoft.com/playwright:v1.48.0-noble
 
 # Set working directory
 WORKDIR /app
@@ -8,11 +7,11 @@ WORKDIR /app
 # Copy package files first for better layer caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev
+# Install ALL dependencies (need dev deps for build)
+RUN npm ci
 
-# Install Playwright browsers (just chromium for smaller image)
-RUN npx playwright install chromium
+# Install Playwright Chromium browser
+RUN npx playwright install chromium --with-deps
 
 # Copy Prisma schema and generate client
 COPY prisma ./prisma/
@@ -23,6 +22,9 @@ COPY . .
 
 # Build the application
 RUN npm run build
+
+# Remove dev dependencies after build
+RUN npm prune --omit=dev
 
 # Expose port
 EXPOSE 3000
