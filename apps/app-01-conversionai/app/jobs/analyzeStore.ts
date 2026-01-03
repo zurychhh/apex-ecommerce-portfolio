@@ -55,15 +55,20 @@ export async function analyzeStore(data: AnalyzeStoreJobData) {
     logger.info('Fetching theme...');
     const theme = await fetchCurrentTheme(shop);
 
-    // 3. Capture screenshots (skip for now - Railway may not have browser)
-    logger.info('Skipping screenshots (Railway compatibility)...');
-    const screenshots: Screenshot[] = [];
-    // TODO: Re-enable when Playwright browsers are configured:
-    // const screenshots = await captureScreenshots(shopDomain, [
-    //   '/',
-    //   `/products/${products[0]?.handle || 'example'}`,
-    //   '/cart',
-    // ]);
+    // 3. Capture screenshots (now enabled with Dockerfile + Playwright)
+    logger.info('Capturing screenshots with Playwright...');
+    let screenshots: Screenshot[] = [];
+    try {
+      screenshots = await captureScreenshots(shopDomain, [
+        '/',
+        `/products/${products[0]?.handle || 'example'}`,
+        '/cart',
+      ]);
+      logger.info(`Captured ${screenshots.length} screenshots`);
+    } catch (screenshotError) {
+      logger.warn('Screenshot capture failed (non-fatal):', screenshotError);
+      // Continue without screenshots - analysis can still work
+    }
 
     // 4. Find competitors (optional, best-effort)
     // TODO: Implement competitor discovery
