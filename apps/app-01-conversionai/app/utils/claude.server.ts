@@ -59,34 +59,26 @@ Top competitors in this niche:
 ${competitors.map(c => `- ${c.name}: ${c.heroCTA}, ${c.trustBadges}`).join('\n')}` : ''}
 
 TASK:
-Generate 10-15 prioritized, actionable recommendations to achieve the goal: "${primaryGoal}".
+Generate exactly 5 prioritized, actionable CRO recommendations for goal: "${primaryGoal}".
 
-For EACH recommendation, provide:
+For EACH recommendation provide these fields (keep responses concise):
+- title: Action-oriented, specific (e.g., "Change hero CTA to 'Shop Now'")
+- category: One of [hero_section, product_page, cart_page, mobile, trust_building]
+- description: 1-2 sentences max
+- impactScore: 1-5
+- effortScore: 1-5
+- estimatedUplift: e.g., "+0.3-0.5%"
+- estimatedROI: e.g., "+$2K/mo"
+- reasoning: 1 sentence why this matters
+- implementation: 2-3 bullet points max
 
-1. **title**: Clear, action-oriented (e.g., "Change hero CTA from X to Y")
-2. **category**: One of [hero_section, product_page, cart_page, checkout, mobile, trust_building, social_proof, urgency, pricing, navigation]
-3. **description**: 2-3 sentences explaining the problem and solution
-4. **impactScore**: 1-5 (how much this will move the needle)
-5. **effortScore**: 1-5 (how hard to implement, 1=easy, 5=complex)
-6. **estimatedUplift**: Range like "+0.3-0.5% conversion rate"
-7. **estimatedROI**: Monthly revenue impact like "+$2,100-3,500/mo"
-8. **reasoning**: Why this matters (data-driven, reference competitors or benchmarks)
-9. **implementation**: Step-by-step guide (3-5 bullet points)
-10. **codeSnippet**: Exact Liquid/HTML/CSS code to copy-paste (if applicable)
-
-PRIORITIZATION LOGIC:
+RULES:
 - Quick wins first (high impact, low effort)
-- Address the PRIMARY GOAL directly
-- Reference industry benchmarks when suggesting changes
-- Be specific (not "improve CTA" but "change CTA from 'Buy Now' to 'Shop Best Sellers'")
+- Be specific to THIS store
+- Keep each field brief
 
-OUTPUT FORMAT: JSON array with key "recommendations".
-
-CRITICAL: Focus ONLY on changes that directly impact the primary goal. No generic advice. Every recommendation must be:
-1. Specific to THIS store
-2. Backed by data/competitor analysis
-3. Implementable in <30 minutes
-4. Measurable impact`;
+OUTPUT: Return ONLY valid JSON: {"recommendations": [...]}
+No markdown, no explanation, just the JSON object.`;
 }
 
 export interface Recommendation {
@@ -223,6 +215,23 @@ export function parseRecommendations(responseText: string): Recommendation[] {
     }
   }
 
+  // Helper function to map recommendation object
+  const mapRecommendation = (rec: any): Recommendation => ({
+    title: rec.title || 'Untitled Recommendation',
+    category: rec.category || 'general',
+    description: rec.description || '',
+    impactScore: parseInt(rec.impactScore) || 3,
+    effortScore: parseInt(rec.effortScore) || 3,
+    priority: (parseInt(rec.impactScore) || 3) * 2 - (parseInt(rec.effortScore) || 3),
+    estimatedUplift: rec.estimatedUplift || 'TBD',
+    estimatedROI: rec.estimatedROI || 'TBD',
+    reasoning: rec.reasoning || '',
+    implementation: Array.isArray(rec.implementation)
+      ? rec.implementation.join('\n')
+      : (rec.implementation || ''),
+    codeSnippet: rec.codeSnippet || null,
+  });
+
   try {
     const parsed = JSON.parse(jsonText);
 
@@ -235,25 +244,42 @@ export function parseRecommendations(responseText: string): Recommendation[] {
     }
 
     logger.info(`Found ${recommendations.length} recommendations`);
+    return recommendations.map(mapRecommendation);
 
-    // Calculate priority for each recommendation
-    return recommendations.map((rec: any) => ({
-      title: rec.title || 'Untitled Recommendation',
-      category: rec.category || 'general',
-      description: rec.description || '',
-      impactScore: parseInt(rec.impactScore) || 3,
-      effortScore: parseInt(rec.effortScore) || 3,
-      priority: (parseInt(rec.impactScore) || 3) * 2 - (parseInt(rec.effortScore) || 3),
-      estimatedUplift: rec.estimatedUplift || 'TBD',
-      estimatedROI: rec.estimatedROI || 'TBD',
-      reasoning: rec.reasoning || '',
-      implementation: rec.implementation || '',
-      codeSnippet: rec.codeSnippet || null,
-    }));
   } catch (error: any) {
-    logger.error('JSON parse error:', error.message);
+    logger.warn('Primary JSON parse failed, trying fallback extraction:', error.message);
+
+    // Fallback: Try to extract individual recommendation objects
+    // This handles truncated JSON by finding complete objects
+    const recommendations: Recommendation[] = [];
+    const objectPattern = /\{[^{}]*"title"\s*:\s*"[^"]+[^{}]*\}/g;
+    const matches = jsonText.match(objectPattern);
+
+    if (matches && matches.length > 0) {
+      logger.info(`Fallback: Found ${matches.length} potential recommendation objects`);
+
+      for (const match of matches) {
+        try {
+          // Try to parse each match as a complete object
+          const rec = JSON.parse(match);
+          if (rec.title) {
+            recommendations.push(mapRecommendation(rec));
+          }
+        } catch {
+          // Skip malformed objects
+        }
+      }
+
+      if (recommendations.length > 0) {
+        logger.info(`Fallback extraction succeeded: ${recommendations.length} recommendations`);
+        return recommendations;
+      }
+    }
+
+    // If fallback also fails, log and throw
+    logger.error('All parsing attempts failed');
     logger.error('Attempted to parse:', jsonText.substring(0, 500));
-    logger.error('Full response:', responseText.substring(0, 1000));
+    logger.error('Full response (first 1500 chars):', responseText.substring(0, 1500));
     throw new Error(`Failed to parse recommendations: ${error.message}`);
   }
 }
