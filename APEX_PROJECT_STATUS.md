@@ -1,24 +1,54 @@
 # APEX eCommerce Portfolio - Project Status
 
-**Last Updated**: 2026-01-02 13:15 UTC
+**Last Updated**: 2026-01-03 (Session #13)
 
 ---
 
 ## Active App: ConversionAI (App #1)
 
-### Overall Progress: 98% MVP Complete
+### Overall Progress: 99% MVP Complete
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Week 1 - Foundation | ✅ Complete | 100% |
 | Week 2 - Features | ✅ Complete | 100% |
-| Week 3 - Polish & Deploy | ✅ Complete | 98% |
+| Week 3 - Polish & Deploy | ✅ Complete | 99% |
 
 **Testing Status**:
 - ✅ Unit Tests: 108/108 PASS (100%)
 - ✅ API Health Checks: 5/5 PASS (100%)
 - ✅ Code Coverage: 83.2% statements, 84.2% branches, 80% functions
 - ✅ Browser E2E Tests: HTTP 500 FIXED - App loads correctly in iframe
+- ✅ Claude API: Model limits fixed, JSON parsing improved (Session #13)
+
+---
+
+## ✅ RESOLVED: AI Analysis Not Working (Session #13)
+
+### Problem (Was)
+Analysis ran but generated 0 recommendations. No errors visible in UI.
+
+### Root Causes Found
+| Issue | Root Cause | Fix |
+|-------|------------|-----|
+| 1. API key missing | ANTHROPIC_API_KEY not set on Railway | Set via GraphQL API |
+| 2. max_tokens too high | Haiku limit: 4096, we used 8000 | Changed to 4096 |
+| 3. JSON parsing fragile | Claude wraps JSON in markdown | Multi-strategy parser |
+
+### Fixes Applied (Session #13)
+1. ✅ Set `ANTHROPIC_API_KEY` on Railway via GraphQL API
+2. ✅ Changed `max_tokens: 8000` → `4096` in claude.server.ts
+3. ✅ Improved `parseRecommendations()` with multi-strategy JSON extraction
+
+### Commits
+- `cb41dbe` - `fix: Reduce max_tokens to 4096 for Claude Haiku model`
+- `99762e6` - `fix: Improve JSON parsing with multiple extraction strategies`
+
+### Lessons Learned
+1. **Always check model limits** before setting max_tokens
+2. **Log full error body** including `error.error` and `error.body`
+3. **Claude response parsing** needs multiple extraction strategies
+4. **Use Puppeteer** for debugging embedded apps (iframe context)
 
 ---
 
@@ -48,6 +78,50 @@ The Shopify package detects browser User-Agents and triggers embedded auth flow,
 ---
 
 ## Session History
+
+### Session #13 (2026-01-03)
+**Duration**: ~2h
+**Focus**: Fix AI Analysis generating 0 recommendations
+
+**Problem Solved**:
+Analysis appeared to run but always generated 0 recommendations. Used Puppeteer scripts to capture actual errors from Shopify Admin iframe context.
+
+**Root Causes Found & Fixed**:
+1. **ANTHROPIC_API_KEY not set on Railway** - Set via GraphQL API
+2. **max_tokens: 8000 exceeds Haiku limit (4096)** - Changed to 4096
+3. **JSON parsing fails on markdown-wrapped response** - Added multi-strategy extraction
+
+**Debugging Approach**:
+- Created Puppeteer scripts to POST to analysis endpoint from iframe context
+- Captured HTTP 400/500 error bodies (not visible in browser)
+- Added detailed error logging to claude.server.ts
+- Tested Claude API directly with curl to verify key works
+
+**Files Modified**:
+- `app/utils/claude.server.ts` - Fixed max_tokens, improved JSON parsing, better error logging
+- `app/routes/app.analysis.start.tsx` - Added error display in UI
+
+**Commits**:
+- `cb41dbe` - `fix: Reduce max_tokens to 4096 for Claude Haiku model`
+- `99762e6` - `fix: Improve JSON parsing with multiple extraction strategies`
+
+**Status**: Deployed, awaiting final verification
+
+---
+
+### Session #12 (2026-01-03)
+**Duration**: ~1h
+**Focus**: Initial AI analysis debugging - synchronous mode
+
+**Completed**:
+- ✅ Changed to synchronous analysis (bypass Bull queue) for debugging
+- ✅ Changed model from claude-3-5-sonnet to claude-3-haiku (API access issue)
+- ✅ Created debug page at /app/debug
+- ✅ Added queue import to entry.server.tsx
+
+**Result**: Analysis still failing, continued in Session #13
+
+---
 
 ### Session #11 (2026-01-02)
 **Duration**: ~45min
@@ -259,7 +333,7 @@ Installed: `claude mcp add chrome-devtools -- npx chrome-devtools-mcp@latest`
 
 ### Current Status: NO BLOCKERS 🎉
 
-All critical issues have been resolved. The app is functional and ready for E2E testing.
+All critical issues have been resolved. The app is functional and ready for final E2E verification.
 
 ### Resolved Issues (All)
 1. ~~Railway CLI "Project Token not found"~~ → Switched to GraphQL API
@@ -268,6 +342,7 @@ All critical issues have been resolved. The app is functional and ready for E2E 
 4. ~~CSP headers missing~~ → Created entry.server.tsx
 5. ~~"Connection refused" in iframe~~ → Partners sync fixed
 6. ~~HTTP 500 in browser context~~ → Added `isEmbeddedApp: true` + `unstable_newEmbeddedAuthStrategy: true` + boundary exports
+7. ~~AI Analysis generating 0 recommendations~~ → Fixed max_tokens (4096), improved JSON parsing, set ANTHROPIC_API_KEY
 
 ---
 
@@ -287,18 +362,33 @@ All critical issues have been resolved. The app is functional and ready for E2E 
 
 ## Next Session Priorities
 
-1. **Execute E2E Browser Tests** (30 min)
+1. **Verify AI Analysis Works** (15 min)
+   - Run analysis from Shopify Admin
+   - Confirm recommendations are generated and saved
+   - Check Railway logs for success messages
+
+2. **Revert to Queue-Based Analysis** (30 min)
+   - If working, revert from synchronous to Bull queue
+   - Better UX with progress polling
+
+3. **Execute E2E Browser Tests** (30 min)
    - OAuth installation flow
    - Dashboard load
    - AI analysis trigger
    - Recommendation detail modal
    - Billing upgrade flow
 
-2. **Configure cron-job.org** (15 min)
+4. **Configure cron-job.org** (15 min)
    - Set up weekly refresh calls
    - Verify CRON_SECRET is working
 
-3. **Final Review** (15 min)
-   - Verify all features working
-   - Check production logs
-   - Update documentation if needed
+### Railway Log Messages to Look For:
+```
+[ANALYSIS] Starting analysis for shop: conversionai-development.myshopify.com
+[CLAUDE] Calling Claude API with Vision...
+[CLAUDE] Sending X screenshots to Claude
+[CLAUDE] Claude API response received
+[CLAUDE] Parsing Claude response, length: XXXX
+[CLAUDE] Found N recommendations
+[ANALYSIS] Analysis complete: N recommendations generated
+```

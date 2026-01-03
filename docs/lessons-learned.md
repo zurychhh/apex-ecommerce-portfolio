@@ -69,11 +69,17 @@ This document tracks insights from building each app in the APEX portfolio.
 - Railway CLI - wymaga interaktywnego logowania (rozwiązanie: użyj API)
 - Shopify Partner API - nie można tworzyć apps (rozwiązanie: manual w Dashboard)
 - Expect scripts dla Shopify CLI - niestabilne, prompty się zmieniają
+- Claude API max_tokens: 8000 dla Haiku (limit: 4096 - API zwraca 400 error)
+- Silent error swallowing: ukrywanie faktycznego błędu utrudnia debugowanie
+- Testowanie embedded app przez curl: nie działa, wymaga sesji Shopify
 
 **Solutions/Workarounds**:
 - Railway: Używaj GraphQL API z Bearer token zamiast CLI
 - Shopify: Utwórz app ręcznie, resztę automatyzuj przez CLI
 - Database: `prisma db push` dla initial setup, migracje dla zmian
+- Claude API: Zawsze sprawdzaj limity modelu przed użyciem (Haiku: 4096 tokens)
+- Błędy: Loguj pełny body błędu: `JSON.stringify(error.error || error.body || {})`
+- Iframe debug: Używaj Puppeteer z Chrome DevTools Protocol (port 9222)
 
 **Next Time**:
 - Od razu używaj Railway GraphQL API
@@ -115,12 +121,107 @@ This document tracks insights from building each app in the APEX portfolio.
 - Custom API integrations
 - Unique features
 
+### Claude API Integration Best Practices
+
+**Model Limits (as of 2026-01)**:
+| Model | Max Output Tokens | Notes |
+|-------|-------------------|-------|
+| Claude 3 Haiku | 4,096 | Fast, cheap |
+| Claude 3 Sonnet | 4,096 | Balanced |
+| Claude 3 Opus | 4,096 | Best quality |
+| Claude 3.5 Sonnet | 8,192 | May not be on all API keys |
+
+**Error Handling Pattern**:
+```typescript
+try {
+  const response = await anthropic.messages.create({...});
+} catch (error: any) {
+  // CRITICAL: Log FULL error body, not just message
+  logger.error('Error details:', {
+    message: error.message,
+    status: error.status,
+    type: error.type,
+    body: JSON.stringify(error.error || error.body || {}),
+  });
+
+  // Handle specific status codes
+  if (error.status === 400) {
+    // Check for max_tokens, model issues
+  } else if (error.status === 429) {
+    // Rate limited - retry with backoff
+  }
+}
+```
+
+**JSON Response Parsing**:
+Claude often wraps JSON in markdown code blocks. Use multi-strategy extraction:
+1. Try regex: `/```(?:json)?\s*([\s\S]*?)\s*```/`
+2. Try brace-matching: find `{` or `[`, track depth
+3. Fallback: direct `JSON.parse()`
+
+---
+
+### Shopify Embedded App Debugging
+
+**Problem**: Embedded apps run in Shopify Admin iframe - cannot test with curl.
+
+**Solution**: Chrome DevTools Protocol + Puppeteer
+
+```bash
+# 1. Launch Chrome with debugging
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.chrome-debug-profile" \
+  "https://admin.shopify.com/store/YOUR-STORE/apps"
+
+# 2. Verify connection
+curl -s http://localhost:9222/json/version
+
+# 3. Run Puppeteer script
+cd /tmp && node your-debug-script.cjs
+```
+
+**Puppeteer Script Template**:
+```javascript
+const puppeteer = require('puppeteer-core');
+
+(async () => {
+  const browser = await puppeteer.connect({
+    browserURL: 'http://localhost:9222'
+  });
+
+  const pages = await browser.pages();
+  const page = pages.find(p => p.url().includes('admin.shopify.com'));
+
+  // Find Railway app iframe
+  const frames = page.frames();
+  const appFrame = frames.find(f => f.url().includes('railway.app'));
+
+  // Execute in iframe context
+  const result = await appFrame.evaluate(async (url) => {
+    const resp = await fetch(url, { method: 'POST', credentials: 'include' });
+    return { status: resp.status, body: await resp.text() };
+  }, targetUrl);
+
+  console.log(result);
+  await browser.disconnect();
+})();
+```
+
+**Key Scripts Location**: `/tmp/` on local machine
+- `get-full-error.cjs` - Capture POST errors from iframe
+- `test-claude.sh` - Test Claude API key directly
+
+---
+
 ### Common Pitfalls
 
 1. **Over-engineering**: Keep it simple, ship fast
 2. **Premature optimization**: Optimize after you have users
 3. **Scope creep**: Stick to PROJECT_BRIEF.md
 4. **Ignoring user feedback**: Test with real merchants early
+5. **Silent error handling**: Always expose errors during development
+6. **Hardcoded API limits**: Check model docs, limits change
 
 ### Time-Saving Tips
 
