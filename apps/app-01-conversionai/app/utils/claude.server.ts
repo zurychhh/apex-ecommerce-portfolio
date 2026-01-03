@@ -183,19 +183,58 @@ export async function callClaudeAPI(
  * Parse Claude's JSON response into recommendations
  */
 export function parseRecommendations(responseText: string): Recommendation[] {
-  try {
-    // Try to extract JSON from markdown code blocks if present
-    const jsonMatch = responseText.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
-    const jsonText = jsonMatch ? jsonMatch[1] : responseText;
+  logger.info('Parsing Claude response, length:', responseText.length);
+  logger.info('Response preview:', responseText.substring(0, 300));
 
+  let jsonText = responseText;
+
+  // Strategy 1: Try to extract JSON from markdown code blocks
+  const codeBlockMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch) {
+    jsonText = codeBlockMatch[1];
+    logger.info('Extracted from code block');
+  } else {
+    // Strategy 2: Find JSON object or array by looking for { or [
+    const jsonStartBrace = responseText.indexOf('{');
+    const jsonStartBracket = responseText.indexOf('[');
+
+    if (jsonStartBrace >= 0 || jsonStartBracket >= 0) {
+      const startIdx = jsonStartBrace >= 0 && jsonStartBracket >= 0
+        ? Math.min(jsonStartBrace, jsonStartBracket)
+        : Math.max(jsonStartBrace, jsonStartBracket);
+
+      // Find matching end
+      const isObject = responseText[startIdx] === '{';
+      let depth = 0;
+      let endIdx = startIdx;
+
+      for (let i = startIdx; i < responseText.length; i++) {
+        const char = responseText[i];
+        if (char === '{' || char === '[') depth++;
+        if (char === '}' || char === ']') depth--;
+        if (depth === 0) {
+          endIdx = i + 1;
+          break;
+        }
+      }
+
+      jsonText = responseText.substring(startIdx, endIdx);
+      logger.info('Extracted JSON by brace matching, length:', jsonText.length);
+    }
+  }
+
+  try {
     const parsed = JSON.parse(jsonText);
 
     // Handle both { recommendations: [...] } and direct array formats
     const recommendations = Array.isArray(parsed) ? parsed : parsed.recommendations;
 
     if (!Array.isArray(recommendations)) {
+      logger.error('Parsed object keys:', Object.keys(parsed));
       throw new Error('Response does not contain a recommendations array');
     }
+
+    logger.info(`Found ${recommendations.length} recommendations`);
 
     // Calculate priority for each recommendation
     return recommendations.map((rec: any) => ({
@@ -211,10 +250,11 @@ export function parseRecommendations(responseText: string): Recommendation[] {
       implementation: rec.implementation || '',
       codeSnippet: rec.codeSnippet || null,
     }));
-  } catch (error) {
-    logger.error('Failed to parse Claude response:', error);
-    logger.error('Response text:', responseText.substring(0, 500));
-    throw new Error('Failed to parse recommendations from Claude response');
+  } catch (error: any) {
+    logger.error('JSON parse error:', error.message);
+    logger.error('Attempted to parse:', jsonText.substring(0, 500));
+    logger.error('Full response:', responseText.substring(0, 1000));
+    throw new Error(`Failed to parse recommendations: ${error.message}`);
   }
 }
 
