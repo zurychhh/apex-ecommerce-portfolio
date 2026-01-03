@@ -17,7 +17,7 @@
 
 import { prisma } from '../utils/db.server';
 import { fetchShopifyAnalytics, fetchProducts, fetchCurrentTheme } from '../utils/shopify.server';
-import { captureScreenshots, type Screenshot } from './captureScreenshots';
+import { captureScreenshotsExternal, type Screenshot } from '../utils/screenshot-service.server';
 import { callClaudeAPI, buildAnalysisPrompt, parseRecommendations } from '../utils/claude.server';
 import { multiStageAnalysis, type StoreMetrics, type ShopifyData } from '../utils/multi-stage-analysis.server';
 import { sendAnalysisCompleteEmail } from '../utils/email.server';
@@ -27,9 +27,9 @@ import { logger } from '../utils/logger.server';
 // ENABLED: Now using Bull queue for background processing (no timeout issues)
 const USE_MULTI_STAGE_ANALYSIS = true;
 
-// Feature flag: Enable screenshot capture (requires Playwright/Docker)
-// Set ENABLE_SCREENSHOTS=true in environment when Docker deployment is ready
-const ENABLE_SCREENSHOTS = process.env.ENABLE_SCREENSHOTS === 'true';
+// Feature flag: Enable screenshot capture
+// Set SCREENSHOT_API_KEY in environment to enable (ScreenshotOne.com)
+const ENABLE_SCREENSHOTS = !!process.env.SCREENSHOT_API_KEY;
 
 export interface AnalyzeStoreJobData {
   shopId: string;
@@ -59,24 +59,23 @@ export async function analyzeStore(data: AnalyzeStoreJobData) {
     logger.info('Fetching theme...');
     const theme = await fetchCurrentTheme(shop);
 
-    // 3. Capture screenshots (requires Docker deployment with Playwright)
+    // 3. Capture screenshots via external API (ScreenshotOne.com)
     let screenshots: Screenshot[] = [];
 
     if (ENABLE_SCREENSHOTS) {
-      logger.info('Capturing screenshots...');
+      logger.info('Capturing screenshots via external API...');
       try {
-        screenshots = await captureScreenshots(shopDomain, [
+        screenshots = await captureScreenshotsExternal(shopDomain, [
           '/',              // Homepage
           '/collections/all', // Collection page
-          '/cart',          // Cart page
-        ], { retries: 1, delayMs: 1500 });
+        ]);
         logger.info(`Captured ${screenshots.filter(s => s.base64).length} screenshots`);
       } catch (screenshotError) {
         logger.warn('Screenshot capture failed, continuing without:', screenshotError);
         screenshots = [];
       }
     } else {
-      logger.info('Screenshots disabled (set ENABLE_SCREENSHOTS=true to enable)');
+      logger.info('Screenshots disabled (set SCREENSHOT_API_KEY to enable)');
     }
 
     // 4. Find competitors (optional, best-effort)
