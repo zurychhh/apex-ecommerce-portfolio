@@ -1,5 +1,5 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node';
-import { Form, useLoaderData, useNavigation } from '@remix-run/react';
+import { Form, useLoaderData, useNavigation, useActionData } from '@remix-run/react';
 import { Page, Card, Text, Button, Select, Banner } from '@shopify/polaris';
 import { useState } from 'react';
 import { authenticate } from '../shopify.server';
@@ -60,13 +60,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       });
 
       logger.info(`Analysis completed: ${result.recommendationsCount} recommendations generated`);
+
+      // Redirect to dashboard with success indicator
+      return redirect('/app?analyzed=true');
     } catch (analysisError: any) {
       logger.error('Analysis failed:', analysisError);
-      // Don't throw - still redirect to dashboard
+      // Return error to UI so we can debug
+      return json({
+        error: `Analysis failed: ${analysisError.message}`,
+        stack: analysisError.stack?.substring(0, 500)
+      }, { status: 500 });
     }
-
-    // Redirect to dashboard - analysis should be complete now
-    return redirect('/app');
 
   } catch (error: any) {
     logger.error('Failed to start analysis:', error);
@@ -76,6 +80,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function StartAnalysis() {
   const { shop } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
 
@@ -102,6 +107,19 @@ export default function StartAnalysis() {
       title="Start Analysis"
       backAction={{ url: '/app' }}
     >
+      {actionData?.error && (
+        <div style={{ marginBottom: '16px' }}>
+          <Banner tone="critical">
+            <p><strong>Error:</strong> {actionData.error}</p>
+            {actionData.stack && (
+              <pre style={{ fontSize: '11px', marginTop: '8px', whiteSpace: 'pre-wrap' }}>
+                {actionData.stack}
+              </pre>
+            )}
+          </Banner>
+        </div>
+      )}
+
       {shop.lastAnalysis && (
         <div style={{ marginBottom: '16px' }}>
           <Banner tone="info">
