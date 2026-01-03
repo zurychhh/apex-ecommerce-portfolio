@@ -24,7 +24,8 @@ import { sendAnalysisCompleteEmail } from '../utils/email.server';
 import { logger } from '../utils/logger.server';
 
 // Feature flag: Use multi-stage analysis for better recommendations
-const USE_MULTI_STAGE_ANALYSIS = true;
+// TEMPORARILY DISABLED: Multi-stage times out on Railway, using legacy single-shot
+const USE_MULTI_STAGE_ANALYSIS = false;
 
 export interface AnalyzeStoreJobData {
   shopId: string;
