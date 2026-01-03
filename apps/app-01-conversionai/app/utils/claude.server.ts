@@ -156,6 +156,12 @@ export async function callClaudeAPI(
     return textContent.text;
   } catch (error: any) {
     logger.error('Claude API call failed:', error);
+    logger.error('Error details:', {
+      message: error.message,
+      status: error.status,
+      type: error.type,
+      body: JSON.stringify(error.error || error.body || {}),
+    });
 
     // Provide more helpful error messages
     if (error.status === 429) {
@@ -163,10 +169,13 @@ export async function callClaudeAPI(
     } else if (error.status === 401) {
       throw new Error('Invalid Anthropic API key. Please check your environment variables.');
     } else if (error.status === 400) {
-      throw new Error('Invalid request to Claude API. Check prompt format.');
+      const detail = error.error?.error?.message || error.message || 'Unknown error';
+      throw new Error(`Claude API 400 error: ${detail}`);
+    } else if (error.status === 404) {
+      throw new Error(`Model not found: ${error.message}`);
     }
 
-    throw error;
+    throw new Error(`Claude API error: ${error.message || error.toString()}`);
   }
 }
 
