@@ -1,0 +1,77 @@
+{
+  "mcpServers": {
+    "shopify-dev": {
+      "command": "npx",
+      "args": ["-y", "@shopify/dev-mcp@latest"],
+      "env": {},
+      "description": "Shopify development documentation, GraphQL query generation, scaffolding, validation"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--headless"],
+      "env": {},
+      "description": "E2E testing automation, browser interaction, screenshot capture"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "REPLACE_WITH_YOUR_GITHUB_TOKEN"
+      },
+      "description": "Git automation, PR management, issue tracking, CI/CD triggers"
+    },
+    "shopify-admin": {
+      "command": "npx",
+      "args": ["@akson/mcp-shopify"],
+      "env": {
+        "SHOPIFY_ACCESS_TOKEN": "REPLACE_WITH_YOUR_SHOPIFY_ACCESS_TOKEN",
+        "SHOPIFY_DOMAIN": "REPLACE_WITH_YOUR_STORE.myshopify.com"
+      },
+      "description": "Shopify Admin API access, product/order/customer management, test data generation"
+    }
+  },
+  "_comments": {
+    "setup_instructions": [
+      "1. Copy this file to ~/.config/claude/config.json",
+      "2. Replace REPLACE_WITH_YOUR_* placeholders with actual credentials:",
+      "   - GITHUB_TOKEN: Create at https://github.com/settings/tokens (classic token with repo, workflow, admin:org scopes)",
+      "   - SHOPIFY_ACCESS_TOKEN: Get from Shopify Partner Dashboard > Your App > API credentials",
+      "   - SHOPIFY_DOMAIN: Your development store domain (e.g., conversionai-development.myshopify.com)",
+      "3. Restart Claude Desktop/Code",
+      "4. Verify: claude mcp list (should show 4 servers)"
+    ],
+    "playwright_flags": [
+      "Available flags for playwright:",
+      "--headless: Run without visible browser (CI/CD)",
+      "--headed: Show browser for debugging",
+      "--browser chromium|firefox|webkit: Specific browser",
+      "--viewport 1280x720: Custom viewport size",
+      "--save-trace: Save trace for debugging",
+      "--save-video 1280x720: Record video"
+    ],
+    "optional_configs": {
+      "playwright_headed_mode": {
+        "comment": "For debugging, remove --headless flag",
+        "args": ["@playwright/mcp@latest"]
+      },
+      "playwright_with_recording": {
+        "comment": "Record videos of tests",
+        "args": ["@playwright/mcp@latest", "--headless", "--save-video", "1280x720"]
+      }
+    },
+    "security_notes": [
+      "IMPORTANT: This file contains sensitive credentials.",
+      "- DO NOT commit to Git",
+      "- Add to .gitignore: ~/.config/claude/",
+      "- Use environment-specific tokens (dev, staging, prod)",
+      "- Rotate tokens regularly",
+      "- Use minimum required scopes"
+    ],
+    "troubleshooting": {
+      "servers_not_starting": "Run: npx <package>@latest --version to verify installation",
+      "github_rate_limit": "Authenticated requests have higher limits (5000/hour vs 60/hour)",
+      "shopify_admin_403": "Verify SHOPIFY_ACCESS_TOKEN has correct scopes (read_products, read_orders, etc.)",
+      "playwright_timeout": "Increase default timeout or check network connectivity"
+    }
+  }
+}
