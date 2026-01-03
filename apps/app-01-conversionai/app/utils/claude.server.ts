@@ -5,6 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { logger } from './logger.server';
+import { logAPIUsage } from './cost-monitor.server';
 import type { Screenshot } from '../jobs/captureScreenshots';
 import type { ShopifyAnalytics, ShopifyProduct } from './shopify.server';
 
@@ -24,61 +25,150 @@ interface AnalysisPromptData {
 
 /**
  * Build comprehensive analysis prompt for Claude
+ * Enhanced for Sonnet 4.5 with world-class CRO consultant persona
  */
-export function buildAnalysisPrompt(data: AnalysisPromptData): string {
+export function buildAnalysisPrompt(data: AnalysisPromptData): { system: string; user: string } {
   const { shop, primaryGoal, analytics, products, theme, competitors } = data;
 
-  return `You are an expert CRO (Conversion Rate Optimization) consultant analyzing a Shopify store.
+  const systemPrompt = `You are a world-class eCommerce Conversion Rate Optimization (CRO) consultant with 15+ years of experience.
 
-STORE INFORMATION:
-- Domain: ${shop.domain}
-- Primary Goal: ${primaryGoal}
-- Current Conversion Rate: ${analytics.conversionRate}%
-- Average Order Value: $${analytics.avgOrderValue}
-- Cart Abandonment Rate: ${analytics.cartAbandonmentRate}%
-- Mobile Traffic: ${analytics.mobileConversionRate ? `${analytics.mobileConversionRate}%` : 'N/A'}
-- Total Sessions: ${analytics.totalSessions}
-- Total Orders: ${analytics.totalOrders}
+Your expertise:
+- Optimized 500+ Shopify stores across all industries
+- Average client results: +30-50% conversion rate improvement
+- Deep knowledge of consumer psychology, UX best practices, and data-driven optimization
+- Expert in Shopify Liquid templating, theme customization, and app ecosystem
 
-THEME:
-- Theme Name: ${theme.name}
+Your analysis approach:
+1. EVIDENCE-BASED: Every recommendation backed by data and psychology principles
+2. SPECIFIC: Exact pixel measurements, color codes, copy suggestions
+3. PRIORITIZED: Focus on highest-impact, lowest-effort wins first
+4. REALISTIC: ROI estimates based on actual store metrics, not generic averages
+5. ACTIONABLE: Provide copy-paste ready code and step-by-step implementation
 
-TOP PRODUCTS:
-${products.map((p, i) => `${i + 1}. ${p.title} (${p.handle})`).join('\n')}
+Output format: JSON array of 10-12 recommendations (not 5-7).
+Each recommendation MUST include all fields with high detail.`;
 
-VISUAL ANALYSIS:
-I've captured screenshots of:
-1. Homepage hero section
-2. Top-selling product page
-3. Cart page
+  // Calculate derived metrics
+  const monthlyVisitors = analytics.totalSessions || 10000;
+  const conversionRate = analytics.conversionRate || 1.5;
+  const aov = analytics.avgOrderValue || 75;
+  const cartAbandonmentRate = analytics.cartAbandonmentRate || 70;
+  const mobilePercentage = analytics.mobileConversionRate ? 65 : 60; // Estimate
 
-[Images will be attached via Vision API]
+  const userPrompt = `# STORE ANALYSIS REQUEST
 
-${competitors.length > 0 ? `COMPETITOR COMPARISON:
-Top competitors in this niche:
+## Current Performance Metrics
+- **Conversion Rate**: ${conversionRate}%
+- **Average Order Value**: $${aov}
+- **Monthly Traffic**: ${monthlyVisitors} visitors
+- **Cart Abandonment Rate**: ${cartAbandonmentRate}%
+- **Mobile Traffic**: ${mobilePercentage}%
+
+## Store Context
+- **Domain**: ${shop.domain}
+- **Primary Goal**: ${primaryGoal}
+- **Primary Products**: ${products.slice(0, 5).map(p => p.title).join(", ")}
+- **Theme**: ${theme.name}
+- **Industry**: General eCommerce
+
+${competitors.length > 0 ? `## Competitors
 ${competitors.map(c => `- ${c.name}: ${c.heroCTA}, ${c.trustBadges}`).join('\n')}` : ''}
 
-TASK:
-Generate exactly 5 prioritized, actionable CRO recommendations for goal: "${primaryGoal}".
+## Analysis Instructions
 
-For EACH recommendation provide these fields (keep responses concise):
-- title: Action-oriented, specific (e.g., "Change hero CTA to 'Shop Now'")
-- category: One of [hero_section, product_page, cart_page, mobile, trust_building]
-- description: 1-2 sentences max
-- impactScore: 1-5
-- effortScore: 1-5
-- estimatedUplift: e.g., "+0.3-0.5%"
-- estimatedROI: e.g., "+$2K/mo"
-- reasoning: 1 sentence why this matters
-- implementation: 2-3 bullet points max
+Analyze the provided screenshots (homepage, product page, cart) and store data.
 
-RULES:
-- Quick wins first (high impact, low effort)
-- Be specific to THIS store
-- Keep each field brief
+Generate 10-12 SPECIFIC, ACTIONABLE recommendations prioritized by:
+**Priority Score = (Impact × Urgency) / Effort**
 
-OUTPUT: Return ONLY valid JSON: {"recommendations": [...]}
-No markdown, no explanation, just the JSON object.`;
+For EACH recommendation provide:
+
+1. **title**: Specific action (not "improve mobile UX" but "Reposition CTA 120px higher on mobile")
+2. **description**:
+   - What exactly is wrong (with measurements, data)
+   - Why it hurts conversions (psychology + evidence)
+   - What to change (specific instructions)
+
+3. **impactScore**: 1-5 scale
+   - 5 = Critical (affects >50% of users, major CR blocker)
+   - 4 = High (affects 25-50% users, significant friction)
+   - 3 = Medium (affects 10-25% users, moderate impact)
+   - 2 = Low (affects <10% users, minor improvement)
+   - 1 = Minimal (polish, nice-to-have)
+
+4. **effortScore**: 1-5 scale
+   - 1 = 5-15 minutes (CSS tweak, copy change)
+   - 2 = 30-60 minutes (simple template edit)
+   - 3 = 2-4 hours (multiple file changes)
+   - 4 = 1-2 days (theme customization)
+   - 5 = 1+ week (major rebuild, app integration)
+
+5. **category**: One of: hero | product | cart | checkout | mobile | trust | navigation | speed
+
+6. **estimatedUplift**: Be SPECIFIC based on metrics
+   - Calculate realistic CR improvement percentage
+   - Example: "Current mobile CR 1.2% → projected 1.8% (+0.6%)"
+
+7. **estimatedROI**: Calculate monthly revenue impact
+   - Formula: (New CR - Old CR) × Monthly Traffic × AOV
+   - Example: "+54 orders/mo × $${aov} AOV = +$${Math.round(54 * aov)}/mo"
+   - Show the math in description
+
+8. **implementation**: 3-6 concrete steps with file names
+   - Example: "1. Edit theme.liquid line 47..."
+   - Example: "2. Add CSS to assets/custom.css..."
+
+9. **codeSnippet**: COPY-PASTE READY code
+   - Shopify Liquid for templates
+   - CSS for styling
+   - JavaScript if needed
+   - Include comments explaining what it does
+
+10. **dependencies**: Array of other recommendations that should be done first
+    - Example: ["rec-001-fix-navigation"] if navigation must work first
+
+11. **confidence**: Your confidence in the estimate (%)
+    - 90-100%: Proven pattern, strong data support
+    - 70-89%: Likely works, some assumptions
+    - 50-69%: Hypothesis, needs testing
+    - <50%: Experimental, high variance
+
+12. **benchmarkComparison**: How store compares to industry
+    - Example: "Your hero CTA at 650px, industry best practice <400px"
+    - Example: "Your mobile CR 1.2% vs industry avg 2.1% (-0.9%)"
+
+## Output Format
+
+Return ONLY a JSON object with recommendations array. No markdown, no explanation, just:
+
+{"recommendations": [
+  {
+    "id": "rec-001",
+    "title": "...",
+    "description": "...",
+    "impactScore": 5,
+    "effortScore": 2,
+    "category": "hero",
+    "estimatedUplift": "+0.6% CR (1.8% → 2.4%)",
+    "estimatedROI": "+72 orders/mo × $${aov} = +$${Math.round(72 * aov)}/mo",
+    "implementation": ["...", "..."],
+    "codeSnippet": "...",
+    "dependencies": [],
+    "confidence": 85,
+    "benchmarkComparison": "...",
+    "reasoning": "..."
+  }
+]}
+
+CRITICAL RULES:
+- NO generic advice ("improve UX", "optimize design")
+- EVERY recommendation must be implementable TODAY
+- SHOW YOUR MATH for ROI calculations
+- PRIORITIZE quick wins (high impact, low effort) first
+- BE BRUTALLY HONEST about what's broken
+`;
+
+  return { system: systemPrompt, user: userPrompt };
 }
 
 export interface Recommendation {
@@ -97,16 +187,35 @@ export interface Recommendation {
 
 /**
  * Call Claude API with prompt and screenshots
+ * Supports both legacy single prompt and new system/user prompt format
  */
 export async function callClaudeAPI(
-  prompt: string,
-  screenshots: Screenshot[]
+  promptOrSystem: string,
+  screenshotsOrUser?: Screenshot[] | string,
+  screenshots?: Screenshot[]
 ): Promise<any> {
   try {
     logger.info('Calling Claude API with Vision...');
 
+    // Determine if using new format (system, user) or legacy format (prompt, screenshots)
+    let systemPrompt: string | undefined;
+    let userPrompt: string;
+    let imageScreenshots: Screenshot[];
+
+    if (typeof screenshotsOrUser === 'string') {
+      // New format: callClaudeAPI(system, user, screenshots)
+      systemPrompt = promptOrSystem;
+      userPrompt = screenshotsOrUser;
+      imageScreenshots = screenshots || [];
+    } else {
+      // Legacy format: callClaudeAPI(prompt, screenshots)
+      systemPrompt = undefined;
+      userPrompt = promptOrSystem;
+      imageScreenshots = screenshotsOrUser || [];
+    }
+
     // Convert screenshots to Claude Vision format
-    const imageContent = screenshots
+    const imageContent = imageScreenshots
       .filter(s => s.base64) // Only include screenshots that were captured successfully
       .map(screenshot => ({
         type: 'image' as const,
@@ -120,15 +229,16 @@ export async function callClaudeAPI(
     logger.info(`Sending ${imageContent.length} screenshots to Claude`);
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307', // Claude 3 Haiku - fast and cost-effective
-      max_tokens: 4096, // Maximum for Haiku model
+      model: 'claude-sonnet-4-5-20250929', // ⭐ FLAGSHIP MODEL - Best quality for CRO analysis
+      max_tokens: 8192, // ⭐ DOUBLED for more detailed recommendations
+      ...(systemPrompt ? { system: systemPrompt } : {}),
       messages: [
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: prompt,
+              text: userPrompt,
             },
             ...imageContent,
           ],
@@ -138,6 +248,15 @@ export async function callClaudeAPI(
     });
 
     logger.info('Claude API response received');
+    logger.info(`Token usage: ${response.usage.input_tokens} input, ${response.usage.output_tokens} output`);
+
+    // Log API usage for cost monitoring
+    await logAPIUsage(
+      'claude-sonnet-4-5-20250929',
+      response.usage.input_tokens,
+      response.usage.output_tokens,
+      'analysis' // Could pass shop domain if available
+    );
 
     // Extract text content from response
     const textContent = response.content.find(block => block.type === 'text');
