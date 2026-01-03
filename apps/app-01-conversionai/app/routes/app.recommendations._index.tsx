@@ -12,10 +12,12 @@ import {
   InlineStack,
   Box,
 } from '@shopify/polaris';
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
 import { logger } from '../utils/logger.server';
+import { EnhancedRecommendationModal } from '../components/EnhancedRecommendationModal';
+import type { Recommendation } from '../types/recommendation.types';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -40,6 +42,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     });
   }
 
+  // Return full recommendation data for modal display
   return json({
     recommendations: shop.recommendations.map(rec => ({
       id: rec.id,
@@ -51,7 +54,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       priority: rec.priority,
       estimatedUplift: rec.estimatedUplift,
       estimatedROI: rec.estimatedROI,
-      status: rec.status,
+      reasoning: rec.reasoning,
+      implementation: rec.implementation,
+      codeSnippet: rec.codeSnippet,
+      mockupUrl: rec.mockupUrl,
+      status: rec.status as 'pending' | 'implemented' | 'skipped',
+      implementedAt: rec.implementedAt?.toISOString() || null,
       createdAt: rec.createdAt.toISOString(),
     })),
     shopDomain: session.shop,
@@ -104,11 +112,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function RecommendationsIndex() {
-  const { recommendations, shopDomain } = useLoaderData<typeof loader>();
+  const { recommendations } = useLoaderData<typeof loader>();
   const [sortBy, setSortBy] = useState('priority');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const fetcher = useFetcher();
+
+  // Modal state
+  const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const sortOptions = [
     { label: 'Priority (Quick Wins First)', value: 'priority' },
@@ -129,6 +141,7 @@ export default function RecommendationsIndex() {
     { label: 'Urgency', value: 'urgency' },
     { label: 'Pricing', value: 'pricing' },
     { label: 'Navigation', value: 'navigation' },
+    { label: 'General', value: 'general' },
   ];
 
   const statusOptions = [
@@ -142,7 +155,7 @@ export default function RecommendationsIndex() {
   let filteredRecs = [...recommendations];
 
   if (filterCategory !== 'all') {
-    filteredRecs = filteredRecs.filter(r => r.category === filterCategory);
+    filteredRecs = filteredRecs.filter(r => r.category.toLowerCase() === filterCategory);
   }
 
   if (filterStatus !== 'all') {
@@ -187,12 +200,35 @@ export default function RecommendationsIndex() {
     }
   };
 
-  const handleStatusChange = (recommendationId: string, action: string) => {
+  // Open modal with selected recommendation
+  const handleOpenModal = useCallback((rec: Recommendation) => {
+    setSelectedRecommendation(rec);
+    setModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false);
+    // Don't clear selection immediately to avoid flicker during close animation
+    setTimeout(() => setSelectedRecommendation(null), 300);
+  }, []);
+
+  // Handle status changes from both list and modal
+  const handleStatusChange = useCallback((recommendationId: string, action: string) => {
     fetcher.submit(
       { action, recommendationId },
       { method: 'post' }
     );
-  };
+  }, [fetcher]);
+
+  // Update selected recommendation when data changes (after status update)
+  useEffect(() => {
+    if (selectedRecommendation && fetcher.state === 'idle') {
+      const updated = recommendations.find(r => r.id === selectedRecommendation.id);
+      if (updated) {
+        setSelectedRecommendation(updated);
+      }
+    }
+  }, [recommendations, selectedRecommendation, fetcher.state]);
 
   const pendingCount = recommendations.filter(r => r.status === 'pending').length;
   const implementedCount = recommendations.filter(r => r.status === 'implemented').length;
@@ -270,7 +306,7 @@ export default function RecommendationsIndex() {
                       </Text>
                     </InlineStack>
                     <InlineStack gap="200">
-                      <Badge>{rec.category.replace('_', ' ')}</Badge>
+                      <Badge>{rec.category.replace(/_/g, ' ')}</Badge>
                       {getImpactBadge(rec.impactScore)}
                       {getEffortBadge(rec.effortScore)}
                       {getStatusBadge(rec.status)}
@@ -292,7 +328,7 @@ export default function RecommendationsIndex() {
                 </InlineStack>
 
                 <InlineStack gap="200">
-                  <Button url={`/app/recommendations/${rec.id}`} variant="primary">
+                  <Button onClick={() => handleOpenModal(rec)} variant="primary">
                     View Details
                   </Button>
                   {rec.status !== 'implemented' && (
@@ -335,6 +371,17 @@ export default function RecommendationsIndex() {
           </Card>
         )}
       </BlockStack>
+
+      {/* Enhanced Recommendation Modal */}
+      <EnhancedRecommendationModal
+        recommendation={selectedRecommendation}
+        open={modalOpen}
+        onClose={handleCloseModal}
+        onImplement={(id) => handleStatusChange(id, 'implement')}
+        onSkip={(id) => handleStatusChange(id, 'skip')}
+        onReset={(id) => handleStatusChange(id, 'pending')}
+        loading={fetcher.state === 'submitting'}
+      />
     </Page>
   );
 }
