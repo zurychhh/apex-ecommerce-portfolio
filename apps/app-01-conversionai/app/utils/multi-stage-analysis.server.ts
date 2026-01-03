@@ -147,6 +147,35 @@ export async function multiStageAnalysis(
 
   // If validation passed at least some, use validated results
   const withConflictCheck = conflictCheck(validated) as Stage3Prioritized[];
+
+  // FINAL SAFETY: If we somehow have 0 recommendations, generate basic fallback
+  if (withConflictCheck.length === 0) {
+    logger.warn('Final safety: 0 recommendations after all stages, generating emergency fallback');
+    const emergencyFallback: Stage3Prioritized[] = [{
+      id: 'rec-emergency-001',
+      title: `Optimize checkout flow to reduce ${metrics.cartAbandonmentRate}% cart abandonment`,
+      description: `Your cart abandonment rate of ${metrics.cartAbandonmentRate}% is above industry average. Simplifying checkout can improve conversions.`,
+      impactScore: 4,
+      effortScore: 3,
+      category: 'checkout',
+      priorityScore: 13,
+      implementationOrder: 1,
+      dependencies: [],
+      estimatedUplift: '+0.5% CR',
+      estimatedROI: `+$${Math.round(metrics.monthlyVisitors * 0.005 * metrics.avgOrderValue)}/mo`,
+      implementation: [
+        'Add guest checkout option to reduce friction',
+        'Reduce form fields to essential information only',
+        'Add progress indicator to show checkout steps',
+        'Implement address autocomplete for faster entry'
+      ],
+      confidence: 70,
+      benchmarkComparison: `${metrics.cartAbandonmentRate}% vs 69% industry average`,
+      reasoning: 'Reducing checkout friction is proven to decrease cart abandonment and increase conversions.'
+    }];
+    return emergencyFallback;
+  }
+
   return withConflictCheck;
 }
 
@@ -193,7 +222,15 @@ Return JSON array of 3-5 problems, sorted by severity DESC:
       screenshots
     );
 
-    return parseJSONResponse(response, []);
+    const problems = parseJSONResponse(response, []) as Stage1Problem[];
+
+    // If parsing returned empty, use fallback
+    if (!problems || problems.length === 0) {
+      logger.warn('Stage 1: Claude returned empty/invalid JSON, using fallback problems');
+      return generateFallbackProblems(metrics);
+    }
+
+    return problems;
   } catch (error) {
     logger.error("Stage 1 failed:", error);
     // Return fallback problems based on metrics
@@ -354,6 +391,12 @@ Return JSON array of 10-12 recommendations sorted by priority score:
     );
 
     const enriched = parseJSONResponse(response, []) as any[];
+
+    // If parsing returned empty, use fallback with input recommendations
+    if (!enriched || enriched.length === 0) {
+      logger.warn('Stage 3: Claude returned empty/invalid JSON, using enriched input');
+      throw new Error('Empty stage 3 response - falling back to input enrichment');
+    }
 
     // Calculate realistic ROI for each recommendation using our calculator
     logger.info('Calculating realistic ROI for each recommendation...');
