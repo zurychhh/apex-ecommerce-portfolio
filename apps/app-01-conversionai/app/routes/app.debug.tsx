@@ -1,16 +1,35 @@
 /**
  * Debug page to test analysis components
  * /app/debug - Shows diagnostic information
+ * /app/debug?reset=true - Reset monthly analysis count
  */
 
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { Page, Card, Text, BlockStack, Banner, Box } from '@shopify/polaris';
+import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from '@remix-run/node';
+import { useLoaderData, Form } from '@remix-run/react';
+import { Page, Card, Text, BlockStack, Banner, Box, Button } from '@shopify/polaris';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
 import { fetchShopifyAnalytics, fetchProducts, fetchCurrentTheme } from '../utils/shopify.server';
 import { callClaudeAPI, buildAnalysisPrompt, parseRecommendations } from '../utils/claude.server';
 import { logger } from '../utils/logger.server';
+
+// Action to reset monthly analysis count
+export async function action({ request }: ActionFunctionArgs) {
+  const { session } = await authenticate.admin(request);
+
+  // Reset lastAnalysis to null (allows new analysis)
+  await prisma.shop.update({
+    where: { domain: session.shop },
+    data: { lastAnalysis: null },
+  });
+
+  // Also clear old recommendations
+  await prisma.recommendation.deleteMany({
+    where: { shop: { domain: session.shop } },
+  });
+
+  return json({ reset: true });
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const results: Record<string, any> = {
@@ -22,6 +41,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
     // Step 1: Authenticate
     const { session } = await authenticate.admin(request);
     results.steps.push({ step: 'authenticate', status: 'success', shop: session.shop });
+
+    // Check for reset parameter
+    const url = new URL(request.url);
+    if (url.searchParams.get('reset') === 'true') {
+      await prisma.shop.update({
+        where: { domain: session.shop },
+        data: { lastAnalysis: null },
+      });
+      await prisma.recommendation.deleteMany({
+        where: { shop: { domain: session.shop } },
+      });
+      results.reset = 'Analysis count reset! You can now run a new analysis.';
+    }
 
     // Step 2: Get shop from DB
     const shop = await prisma.shop.findUnique({
@@ -108,6 +140,12 @@ export default function DebugPage() {
   return (
     <Page title="Debug Diagnostics" backAction={{ url: '/app' }}>
       <BlockStack gap="400">
+        {results.reset && (
+          <Banner tone="success">
+            <p>{results.reset}</p>
+          </Banner>
+        )}
+
         {results.error && (
           <Banner tone="critical">
             <p>Error: {results.error}</p>
@@ -119,6 +157,18 @@ export default function DebugPage() {
             <p>All diagnostics passed!</p>
           </Banner>
         )}
+
+        <Card>
+          <Box padding="400">
+            <BlockStack gap="300">
+              <Text as="h2" variant="headingMd">Actions</Text>
+              <Form method="get">
+                <input type="hidden" name="reset" value="true" />
+                <Button submit variant="primary" tone="critical">Reset Monthly Analysis Count</Button>
+              </Form>
+            </BlockStack>
+          </Box>
+        </Card>
 
         <Card>
           <Box padding="400">
