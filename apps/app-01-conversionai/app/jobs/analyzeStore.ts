@@ -27,6 +27,10 @@ import { logger } from '../utils/logger.server';
 // ENABLED: Now using Bull queue for background processing (no timeout issues)
 const USE_MULTI_STAGE_ANALYSIS = true;
 
+// Feature flag: Enable screenshot capture (requires Playwright/Docker)
+// Set ENABLE_SCREENSHOTS=true in environment when Docker deployment is ready
+const ENABLE_SCREENSHOTS = process.env.ENABLE_SCREENSHOTS === 'true';
+
 export interface AnalyzeStoreJobData {
   shopId: string;
   shopDomain: string;
@@ -55,10 +59,25 @@ export async function analyzeStore(data: AnalyzeStoreJobData) {
     logger.info('Fetching theme...');
     const theme = await fetchCurrentTheme(shop);
 
-    // 3. Capture screenshots (DISABLED - Playwright not available on Railway NIXPACKS)
-    // TODO: Enable when Docker deployment is configured
-    logger.info('Screenshots disabled (Railway compatibility)...');
-    const screenshots: Screenshot[] = [];
+    // 3. Capture screenshots (requires Docker deployment with Playwright)
+    let screenshots: Screenshot[] = [];
+
+    if (ENABLE_SCREENSHOTS) {
+      logger.info('Capturing screenshots...');
+      try {
+        screenshots = await captureScreenshots(shopDomain, [
+          '/',              // Homepage
+          '/collections/all', // Collection page
+          '/cart',          // Cart page
+        ], { retries: 1, delayMs: 1500 });
+        logger.info(`Captured ${screenshots.filter(s => s.base64).length} screenshots`);
+      } catch (screenshotError) {
+        logger.warn('Screenshot capture failed, continuing without:', screenshotError);
+        screenshots = [];
+      }
+    } else {
+      logger.info('Screenshots disabled (set ENABLE_SCREENSHOTS=true to enable)');
+    }
 
     // 4. Find competitors (optional, best-effort)
     // TODO: Implement competitor discovery
