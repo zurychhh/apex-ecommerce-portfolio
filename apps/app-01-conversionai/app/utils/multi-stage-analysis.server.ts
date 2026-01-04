@@ -525,7 +525,7 @@ function generateFallbackProblems(metrics: StoreMetrics): Stage1Problem[] {
     });
   }
 
-  if (metrics.cartAbandonmentRate > 70) {
+  if (metrics.cartAbandonmentRate >= 65) {
     problems.push({
       id: 'prob-cart-abandon',
       title: 'High cart abandonment rate suggests checkout friction',
@@ -533,6 +533,18 @@ function generateFallbackProblems(metrics: StoreMetrics): Stage1Problem[] {
       affectedUsers: `${metrics.cartAbandonmentRate}% of cart initiators`,
       category: 'cart',
       quickEvidence: `${metrics.cartAbandonmentRate}% abandon rate vs 69% industry avg`
+    });
+  }
+
+  // Always add AOV optimization if avg order value < $100
+  if (metrics.avgOrderValue < 100) {
+    problems.push({
+      id: 'prob-low-aov',
+      title: 'Average order value below $100 indicates upsell opportunity',
+      severity: 7,
+      affectedUsers: 'All customers',
+      category: 'pricing',
+      quickEvidence: `AOV $${metrics.avgOrderValue} - room for bundle/upsell strategies`
     });
   }
 
