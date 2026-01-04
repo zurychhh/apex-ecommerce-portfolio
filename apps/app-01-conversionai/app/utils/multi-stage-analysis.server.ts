@@ -348,14 +348,17 @@ For each recommendation provide:
 
 1. id: Unique ID (rec-001, rec-002, etc.)
 
-2. title: BUSINESS OUTCOME FIRST (max 60 chars)
-   - Lead with revenue/conversion impact, not technical change
-   - Format: "[Business result] by [simple action]"
-   - GOOD: "Recover $2,250/mo in lost sales from hidden checkout button"
-   - GOOD: "Stop losing 34% of mobile shoppers at product pages"
-   - GOOD: "Turn hesitant browsers into buyers with social proof"
-   - BAD: "Reposition CTA from 650px to 350px" (too technical)
-   - BAD: "Add urgency elements to product page" (no outcome)
+2. title: BUSINESS NUMBERS + CLEAR ACTION (max 70 chars)
+   - MUST include business metrics: $revenue, %conversion, customer count
+   - NO technical metrics: px, fold, viewport, DOM, CSS
+   - Format: "[$ or % impact] + [what you'll fix]"
+   - GOOD: "Recover $2,250/mo from 340 shoppers who miss your Add to Cart"
+   - GOOD: "Stop losing 28% of mobile buyers at checkout"
+   - GOOD: "Convert 15% more browsers with visible social proof"
+   - GOOD: "$1,800/mo lost to cart abandoners who don't see shipping costs"
+   - BAD: "Reposition CTA from 650px to 350px" (technical, no business impact)
+   - BAD: "Add above-fold urgency elements" (jargon, no numbers)
+   - BAD: "Improve mobile experience" (vague, no metrics)
 
 3. description: 2-3 sentences. First sentence = business problem & impact. Second sentence = simple solution. No jargon.
    - GOOD: "34% of your mobile visitors leave product pages without adding to cart - that's ~850 lost customers/month. Adding a sticky 'Add to Cart' bar keeps the buying option visible as they scroll."
