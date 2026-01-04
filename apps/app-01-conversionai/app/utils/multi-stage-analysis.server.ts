@@ -326,44 +326,69 @@ async function stage3_PrioritizeAndEnrich(
   metrics: StoreMetrics,
   screenshots: Screenshot[]
 ): Promise<Stage3Prioritized[]> {
-  const systemPrompt = `You are a CRO expert finalizing recommendations with implementation details.
+  const systemPrompt = `You are a senior eCommerce advisor presenting to a CEO.
+Your job: translate technical CRO findings into clear business opportunities.
+Lead with money and impact, save technical details for implementation steps.
 Return ONLY valid JSON array. No markdown, no explanation.`;
 
   const userPrompt = `You have ${recommendations.length} CRO recommendations to enrich and prioritize.
 
 Store metrics:
 - Current CR: ${metrics.conversionRate}%
-- Monthly traffic: ${metrics.monthlyVisitors}
+- Monthly traffic: ${metrics.monthlyVisitors.toLocaleString()}
 - AOV: $${metrics.avgOrderValue}
 - Cart abandonment: ${metrics.cartAbandonmentRate}%
 
 Recommendations to process:
 ${JSON.stringify(recommendations, null, 2)}
 
-For each recommendation, provide complete enrichment with SPECIFIC MEASUREMENTS:
+IMPORTANT: You are writing for a busy CEO who has 5 seconds to decide if a recommendation is worth pursuing.
+
+For each recommendation provide:
 
 1. id: Unique ID (rec-001, rec-002, etc.)
-2. title: MUST include specific numbers (px, %, $) - e.g., "Reposition hero CTA from 650px to 350px to achieve above-fold visibility"
-3. description: Full explanation with specific numbers - what's wrong (with measurements), why it matters (with %), what to do (with exact values)
-4. impactScore: 1-5 (5 = critical, affects >50% users)
-5. effortScore: 1-5 (1 = 15 min CSS tweak, 5 = 1+ week rebuild)
+
+2. title: BUSINESS OUTCOME FIRST (max 60 chars)
+   - Lead with revenue/conversion impact, not technical change
+   - Format: "[Business result] by [simple action]"
+   - GOOD: "Recover $2,250/mo in lost sales from hidden checkout button"
+   - GOOD: "Stop losing 34% of mobile shoppers at product pages"
+   - GOOD: "Turn hesitant browsers into buyers with social proof"
+   - BAD: "Reposition CTA from 650px to 350px" (too technical)
+   - BAD: "Add urgency elements to product page" (no outcome)
+
+3. description: 2-3 sentences. First sentence = business problem & impact. Second sentence = simple solution. No jargon.
+   - GOOD: "34% of your mobile visitors leave product pages without adding to cart - that's ~850 lost customers/month. Adding a sticky 'Add to Cart' bar keeps the buying option visible as they scroll."
+   - BAD: "The CTA element is positioned below the fold requiring scroll interaction which reduces conversion probability based on Fitts's law."
+
+4. impactScore: 1-5 (5 = affects >50% of revenue)
+5. effortScore: 1-5 (1 = 15 min, 5 = 1+ week)
 6. category: hero|product|cart|checkout|mobile|trust|navigation|speed
-7. estimatedUplift: "+X.X% CR (${metrics.conversionRate}% → Y%)"
-8. estimatedROI: "+$X,XXX/mo based on Y additional orders"
-9. implementation: Array of 4-6 DETAILED steps - each must start with action verb (Edit, Add, Change, Update, Create, Remove, Modify) and include file name where applicable - e.g., "Edit sections/hero.liquid line 47 to modify CTA wrapper position"
-10. codeSnippet: Copy-paste ready Liquid/CSS/JS code (minimum 50 chars)
-11. dependencies: Array of rec IDs that must be done first (or empty)
-12. confidence: 0-100% based on evidence strength
-13. benchmarkComparison: Specific comparison with numbers - e.g., "Current CTA at 650px vs best practice 350px"
-14. reasoning: 1-2 sentences on why this works (cite psychology principle)
 
-CRITICAL RULES - Will be rejected if not followed:
-- EVERY title MUST contain specific numbers (px, %, $)
-- EVERY implementation step MUST start with action verb (Edit, Add, Change, etc.)
-- EVERY implementation step MUST be >20 characters with specific details
-- NO generic phrases like "improve UX", "optimize design", "enhance layout"
+7. estimatedUplift: "+X.X% conversion rate"
+8. estimatedROI: "+$X,XXX/mo potential revenue"
 
-Return JSON array of 10-12 recommendations sorted by priority score:
+9. reasoning: ONE sentence explaining WHY this works (buyer psychology, not UX theory)
+   - GOOD: "Shoppers trust stores more when they see others buying - it reduces the fear of being the first."
+   - BAD: "Social proof leverages normative social influence per Cialdini's principles."
+
+10. implementation: Array of 4-6 steps for developers. Each step:
+    - Starts with action verb (Edit, Add, Change, Remove)
+    - Includes specific file/location when possible
+    - Technical details go HERE, not in title/description
+
+11. codeSnippet: Ready-to-use Liquid/CSS/JS code (50+ chars)
+12. dependencies: Array of rec IDs to do first (or empty)
+13. confidence: 0-100%
+14. benchmarkComparison: "Your store: X vs Top performers: Y"
+
+TONE RULES:
+- Write like a trusted advisor, not a consultant trying to sound smart
+- Business impact first, technical details last
+- No jargon: "above the fold" → "visible without scrolling"
+- No overpromising: be realistic about impact ranges
+
+Return JSON array of 10-12 recommendations sorted by priority:
 [
   {
     "id": "rec-001",
