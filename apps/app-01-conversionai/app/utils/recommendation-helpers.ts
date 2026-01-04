@@ -169,3 +169,266 @@ export function cleanReasoning(reasoning: string): string {
     .replace(/\nBenchmark:\s*[^\n]+/i, '')
     .trim();
 }
+
+/**
+ * Generate testing checklist based on category
+ */
+export function getTestingChecklist(category: string): string[] {
+  const commonTests = [
+    'Test on mobile viewport (375px width)',
+    'Test on tablet (768px width)',
+    'Verify no console errors',
+    'A/B test for minimum 7 days',
+  ];
+
+  const categoryTests: Record<string, string[]> = {
+    hero_section: [
+      'Check fold line visibility (~600px)',
+      'Verify CTA tap target size (min 44×44px)',
+      'Test on actual devices (not just DevTools)',
+    ],
+    checkout: [
+      'Test complete checkout flow',
+      'Verify all payment methods work',
+      'Check error message display',
+    ],
+    cart_page: [
+      'Test add/remove items',
+      'Verify cart total updates',
+      'Test cart abandonment email triggers',
+    ],
+    mobile: [
+      'Test on iPhone (375×667)',
+      'Test on Android (360×640)',
+      'Verify touch targets >44px',
+      'Test landscape orientation',
+    ],
+    product_page: [
+      'Test with various product types',
+      'Verify variant selection',
+      'Check image gallery functionality',
+    ],
+    trust_building: [
+      'Verify badges display correctly',
+      'Test trust seal visibility',
+      'Check security icon rendering',
+    ],
+    social_proof: [
+      'Verify review count accuracy',
+      'Test star rating display',
+      'Check testimonial loading',
+    ],
+    urgency: [
+      'Verify countdown timer accuracy',
+      'Test stock indicator updates',
+      'Check limited offer visibility',
+    ],
+    pricing: [
+      'Verify price display accuracy',
+      'Test discount calculation',
+      'Check currency formatting',
+    ],
+    navigation: [
+      'Test menu on all breakpoints',
+      'Verify search functionality',
+      'Check breadcrumb accuracy',
+    ],
+  };
+
+  const key = category.toLowerCase().replace(/\s+/g, '_');
+  return [...commonTests, ...(categoryTests[key] || [])];
+}
+
+/**
+ * Get common pitfalls for category
+ */
+export function getCommonPitfalls(category: string): string[] {
+  const pitfalls: Record<string, string[]> = {
+    hero_section: [
+      "Don't move CTA above headline",
+      'Ensure min contrast ratio 4.5:1',
+      'Test seasonal image variations',
+      "Don't hide CTA on scroll",
+    ],
+    checkout: [
+      "Don't remove required security badges",
+      'Keep guest checkout option',
+      "Don't hide shipping costs until final step",
+      'Maintain PCI compliance',
+    ],
+    cart_page: [
+      "Don't hide total price",
+      'Keep visible shipping calculator',
+      "Don't auto-apply untested coupons",
+      'Maintain inventory count accuracy',
+    ],
+    mobile: [
+      "Don't reduce font below 16px",
+      'Keep tap targets >44px',
+      "Don't hide hamburger menu",
+      'Test with one-handed use',
+    ],
+    product_page: [
+      "Don't hide stock count",
+      'Keep variant prices visible',
+      "Don't auto-select variants",
+      'Maintain image quality',
+    ],
+    trust_building: [
+      "Don't remove existing trust badges",
+      'Keep security icons visible',
+      "Don't overcrowd with too many badges",
+      'Ensure badges are from recognized sources',
+    ],
+    social_proof: [
+      "Don't fake reviews or testimonials",
+      'Keep review dates visible',
+      "Don't hide negative reviews completely",
+      'Maintain review authenticity',
+    ],
+    urgency: [
+      "Don't use false scarcity",
+      'Keep countdown timers accurate',
+      "Don't overuse urgency tactics",
+      'Ensure stock counts are real',
+    ],
+    pricing: [
+      "Don't hide original price",
+      'Keep discount percentages accurate',
+      "Don't confuse with multiple currencies",
+      'Maintain price consistency across pages',
+    ],
+    navigation: [
+      "Don't hide main navigation on desktop",
+      'Keep search accessible',
+      "Don't use too many menu levels",
+      'Maintain consistent nav structure',
+    ],
+  };
+
+  const key = category.toLowerCase().replace(/\s+/g, '_');
+  return (
+    pitfalls[key] || [
+      'Test thoroughly before deploying',
+      'Monitor analytics for 48h post-launch',
+      'Have rollback plan ready',
+    ]
+  );
+}
+
+/**
+ * Resource type for helpful links
+ */
+export interface HelpfulResource {
+  type: 'doc' | 'video' | 'research';
+  title: string;
+  url: string;
+}
+
+/**
+ * Get helpful resources for category
+ */
+export function getHelpfulResources(category: string): HelpfulResource[] {
+  const resources: Record<string, HelpfulResource[]> = {
+    hero_section: [
+      {
+        type: 'doc',
+        title: 'Shopify: Theme sections',
+        url: 'https://shopify.dev/docs/themes/architecture/sections',
+      },
+      {
+        type: 'doc',
+        title: 'Liquid reference: Sections',
+        url: 'https://shopify.dev/docs/api/liquid/tags/section',
+      },
+      {
+        type: 'research',
+        title: 'Baymard: Above-the-fold study',
+        url: 'https://baymard.com/blog/above-the-fold',
+      },
+    ],
+    checkout: [
+      {
+        type: 'doc',
+        title: 'Shopify: Checkout customization',
+        url: 'https://shopify.dev/docs/api/checkout-ui-extensions',
+      },
+      {
+        type: 'research',
+        title: 'Baymard: Checkout usability',
+        url: 'https://baymard.com/checkout-usability',
+      },
+    ],
+    cart_page: [
+      {
+        type: 'doc',
+        title: 'Shopify: Cart API',
+        url: 'https://shopify.dev/docs/api/ajax/reference/cart',
+      },
+      {
+        type: 'doc',
+        title: 'Cart templates',
+        url: 'https://shopify.dev/docs/themes/architecture/templates/cart',
+      },
+    ],
+    mobile: [
+      {
+        type: 'research',
+        title: 'Google: Mobile-first indexing',
+        url: 'https://developers.google.com/search/mobile-sites',
+      },
+      {
+        type: 'doc',
+        title: 'Responsive design basics',
+        url: 'https://web.dev/responsive-web-design-basics/',
+      },
+    ],
+    product_page: [
+      {
+        type: 'doc',
+        title: 'Product templates',
+        url: 'https://shopify.dev/docs/themes/architecture/templates/product',
+      },
+      {
+        type: 'doc',
+        title: 'Product media',
+        url: 'https://shopify.dev/docs/api/liquid/objects/product/media',
+      },
+    ],
+    trust_building: [
+      {
+        type: 'research',
+        title: 'Trust signals in eCommerce',
+        url: 'https://baymard.com/blog/trust-seals-and-badges',
+      },
+      {
+        type: 'doc',
+        title: 'Shopify: Security badges',
+        url: 'https://help.shopify.com/en/manual/online-store/themes',
+      },
+    ],
+    social_proof: [
+      {
+        type: 'research',
+        title: 'Social proof psychology',
+        url: 'https://www.nngroup.com/articles/social-proof-ux/',
+      },
+      {
+        type: 'doc',
+        title: 'Shopify: Product reviews',
+        url: 'https://help.shopify.com/en/manual/products/product-reviews',
+      },
+    ],
+  };
+
+  const common: HelpfulResource[] = [
+    {
+      type: 'doc',
+      title: 'Shopify Theme Docs',
+      url: 'https://shopify.dev/docs/themes',
+    },
+  ];
+
+  const key = category.toLowerCase().replace(/\s+/g, '_');
+  return [...(resources[key] || []), ...common];
+}

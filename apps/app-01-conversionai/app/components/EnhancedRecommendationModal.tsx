@@ -25,6 +25,9 @@ import {
   extractConfidence,
   extractBenchmark,
   cleanReasoning,
+  getTestingChecklist,
+  getCommonPitfalls,
+  getHelpfulResources,
 } from '../utils/recommendation-helpers';
 
 interface EnhancedRecommendationModalProps {
@@ -211,7 +214,7 @@ export function EnhancedRecommendationModal({
           {/* Description */}
           <BlockStack gap="200">
             <Text as="h3" variant="headingMd">
-              What to Do
+              🎯 What to Do
             </Text>
             <Text as="p" variant="bodyMd">
               {recommendation.description}
@@ -222,7 +225,7 @@ export function EnhancedRecommendationModal({
           {cleanedReasoning && (
             <BlockStack gap="200">
               <Text as="h3" variant="headingMd">
-                Why This Matters
+                🧠 Why This Matters
               </Text>
               <Text as="p" variant="bodyMd" tone="subdued">
                 {cleanedReasoning}
@@ -246,7 +249,7 @@ export function EnhancedRecommendationModal({
           {implementationSteps.length > 0 && (
             <BlockStack gap="300">
               <Text as="h3" variant="headingMd">
-                Implementation Steps
+                🛠️ Implementation Steps ({implementationSteps.length} steps)
               </Text>
               <BlockStack gap="200">
                 {implementationSteps.map((step, index) => (
@@ -285,7 +288,7 @@ export function EnhancedRecommendationModal({
           {recommendation.codeSnippet && (
             <BlockStack gap="200">
               <Text as="h3" variant="headingMd">
-                Code Snippet
+                💻 Complete Code
               </Text>
               <CodeSnippet
                 code={recommendation.codeSnippet}
@@ -297,6 +300,120 @@ export function EnhancedRecommendationModal({
               />
             </BlockStack>
           )}
+
+          <Divider />
+
+          {/* Testing Checklist */}
+          <BlockStack gap="300">
+            <Text as="h3" variant="headingMd">
+              ✅ Testing Checklist
+            </Text>
+            <Text as="p" variant="bodySm" tone="subdued">
+              Before going live, verify:
+            </Text>
+            <Box
+              background="bg-surface-secondary"
+              padding="400"
+              borderRadius="200"
+            >
+              <BlockStack gap="200">
+                {getTestingChecklist(recommendation.category).map((item, index) => (
+                  <InlineStack key={index} gap="200" blockAlign="start" wrap={false}>
+                    <input
+                      type="checkbox"
+                      id={`test-${index}`}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginTop: '2px',
+                        cursor: 'pointer',
+                        accentColor: '#008060',
+                      }}
+                    />
+                    <label
+                      htmlFor={`test-${index}`}
+                      style={{ cursor: 'pointer', flex: 1 }}
+                    >
+                      <Text as="span" variant="bodyMd">
+                        {item}
+                      </Text>
+                    </label>
+                  </InlineStack>
+                ))}
+              </BlockStack>
+            </Box>
+          </BlockStack>
+
+          <Divider />
+
+          {/* Common Pitfalls */}
+          <BlockStack gap="300">
+            <Text as="h3" variant="headingMd">
+              ⚠️ Common Pitfalls
+            </Text>
+            <Box
+              background="bg-surface-caution"
+              padding="400"
+              borderRadius="200"
+            >
+              <BlockStack gap="200">
+                {getCommonPitfalls(recommendation.category).map((pitfall, index) => (
+                  <InlineStack key={index} gap="200" blockAlign="start" wrap={false}>
+                    <Text as="span" variant="bodyMd">⚠️</Text>
+                    <Text as="p" variant="bodyMd">
+                      {pitfall}
+                    </Text>
+                  </InlineStack>
+                ))}
+              </BlockStack>
+            </Box>
+          </BlockStack>
+
+          <Divider />
+
+          {/* Helpful Resources */}
+          <BlockStack gap="300">
+            <Text as="h3" variant="headingMd">
+              📚 Helpful Resources
+            </Text>
+            <BlockStack gap="200">
+              {getHelpfulResources(recommendation.category).map((resource, index) => (
+                <Box
+                  key={index}
+                  background="bg-surface-secondary"
+                  padding="300"
+                  borderRadius="200"
+                >
+                  <a
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                    }}
+                  >
+                    <Text as="span" variant="bodyMd">
+                      {resource.type === 'doc' && '📖'}
+                      {resource.type === 'video' && '🎥'}
+                      {resource.type === 'research' && '📊'}
+                    </Text>
+                    <Text as="span" variant="bodyMd" fontWeight="medium">
+                      {resource.title}
+                    </Text>
+                    <Text as="span" variant="bodySm" tone="subdued">
+                      ↗
+                    </Text>
+                  </a>
+                </Box>
+              ))}
+            </BlockStack>
+          </BlockStack>
+
+          <Divider />
 
           {/* Priority indicator */}
           <Box paddingBlockStart="200">

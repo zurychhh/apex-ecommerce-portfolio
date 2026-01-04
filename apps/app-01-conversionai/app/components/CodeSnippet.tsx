@@ -50,10 +50,10 @@ export function CodeSnippet({
   const syntaxTheme = theme === 'dark' ? oneDark : oneLight;
 
   return (
+    <div style={{ borderRadius: '8px', overflow: 'hidden' }}>
     <Box
       background={theme === 'dark' ? 'bg-surface-inverse' : 'bg-surface-secondary'}
       borderRadius="200"
-      overflow="hidden"
     >
       {/* Header with language badge and copy button */}
       <Box
@@ -104,6 +104,7 @@ export function CodeSnippet({
         </SyntaxHighlighter>
       </div>
     </Box>
+    </div>
   );
 }
 
