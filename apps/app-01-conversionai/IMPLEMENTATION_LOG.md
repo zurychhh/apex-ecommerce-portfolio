@@ -1,5 +1,195 @@
 # ConversionAI - Implementation Log
 
+## Session #20 - 2026-01-04 (✅ GDPR & LEGAL PAGES COMPLETE)
+
+### ✅ APP STORE COMPLIANCE - DONE
+
+**Status**: GDPR webhooks ✅ | Privacy Policy ✅ | Terms of Service ✅
+
+---
+
+### GDPR Webhooks Created (Shopify Requirement)
+
+**3 mandatory webhooks for App Store submission:**
+
+| Webhook | File | Purpose |
+|---------|------|---------|
+| `customers/data_request` | `webhooks.customers.data-request.tsx` | Customer data request |
+| `customers/redact` | `webhooks.customers.redact.tsx` | Customer data deletion |
+| `shop/redact` | `webhooks.shop.redact.tsx` | Full shop data deletion |
+
+**Note**: ConversionAI does NOT store individual customer data. We only store:
+- Shop-level metrics (conversion rates, AOV, etc.)
+- CRO recommendations for the store
+- Session data for OAuth
+
+Customer webhooks acknowledge requests but have no data to return/delete.
+Shop webhook deletes all shop data + sessions 48h after uninstall.
+
+---
+
+### Legal Pages Live
+
+| Page | URL | Status |
+|------|-----|--------|
+| Privacy Policy | `/privacy` | ✅ HTTP 200 |
+| Terms of Service | `/terms` | ✅ HTTP 200 |
+
+**Production URLs**:
+- https://conversionai-web-production.up.railway.app/privacy
+- https://conversionai-web-production.up.railway.app/terms
+
+---
+
+### Commits This Session
+
+- `a1da613` - `feat: Add GDPR webhooks and legal pages for App Store compliance`
+
+---
+
+### 📊 UPDATED PROJECT STATUS
+
+| Component | Status |
+|-----------|--------|
+| Multi-stage Analysis | ✅ Working (12 recs) |
+| Screenshots (external API) | ✅ Working |
+| UI Modal (9 sections) | ✅ Working |
+| Business-first wording | ✅ Deployed |
+| GDPR Webhooks | ✅ 3/3 Complete |
+| Privacy Policy | ✅ Live |
+| Terms of Service | ✅ Live |
+| App Store Listing | ⏳ Pending |
+
+---
+
+### 🚀 REMAINING FOR APP STORE SUBMISSION
+
+#### 1. APP STORE LISTING ASSETS
+- [ ] App icon (1200x1200 PNG)
+- [ ] Screenshots (min 3, recommended 5)
+- [ ] Short description (max 100 chars)
+- [ ] Detailed description
+- [ ] Demo video (optional)
+
+#### 2. CONFIGURE WEBHOOKS IN PARTNER DASHBOARD
+Register webhook URLs in Shopify Partner Dashboard:
+- `https://conversionai-web-production.up.railway.app/webhooks/customers/data-request`
+- `https://conversionai-web-production.up.railway.app/webhooks/customers/redact`
+- `https://conversionai-web-production.up.railway.app/webhooks/shop/redact`
+
+#### 3. SUBMIT FOR REVIEW
+- Complete App Store listing form
+- Submit for Shopify review (typically 5-7 business days)
+
+---
+
+## Session #19 - 2026-01-04 (📝 BUSINESS WORDING + MODAL TESTED)
+
+### ✅ UI MODAL TESTED + ✅ BUSINESS WORDING IMPLEMENTED
+
+**Status**: Modal ✅ WORKING | Wording ✅ BUSINESS-FIRST | Analysis ✅ 12 RECOMMENDATIONS
+
+---
+
+### UI Modal Enhancement - VERIFIED WORKING
+
+**Tested in browser**: All 9 sections display correctly
+- ✅ Impact & Effort (star ratings)
+- ✅ ROI metrics
+- ✅ Testing Checklist (checkboxes)
+- ✅ Common Pitfalls (yellow background)
+- ✅ Helpful Resources (clickable links)
+
+---
+
+### Business-First Recommendation Wording
+
+**Problem**: Tytuły rekomendacji były zbyt techniczne (px, fold, viewport)
+
+**Solution**: Przepisano Stage 3 prompt dla CEO audience
+
+**Stary format (techniczny)**:
+```
+❌ "Reposition hero CTA from 650px to 350px"
+❌ "Add above-fold urgency elements"
+```
+
+**Nowy format (biznesowy)**:
+```
+✅ "Recover $2,250/mo from 340 shoppers who miss your Add to Cart"
+✅ "Stop losing 28% of mobile buyers at checkout"
+✅ "$1,800/mo lost to cart abandoners who don't see shipping costs"
+```
+
+**Rules in prompt**:
+- MUST include business metrics: $revenue, %conversion, customer count
+- NO technical metrics: px, fold, viewport, DOM, CSS
+- Format: "[$ or % impact] + [what you'll fix]"
+
+**Files Modified**:
+- `app/utils/multi-stage-analysis.server.ts` - Stage 3 prompt rewritten
+
+**Commits**:
+- `0cb5713` - `feat: Business-first recommendation wording for CEO audience`
+- `d61d811` - `fix: Clarify business metrics in titles ($, %, customers - not px)`
+
+---
+
+### Analysis Working - 12 Recommendations
+
+**Tested**: Po naprawieniu modelu Claude (powrót do `claude-sonnet-4-5-20250929`), analiza generuje 12 rekomendacji
+
+**Note**: Nie zmieniać model ID! Działa poprawnie.
+
+---
+
+### 🚀 NEXT STEPS (dla następnej sesji)
+
+#### 1. PRZETESTOWAĆ NOWY WORDING
+- Uruchomić "Refresh Analysis"
+- Sprawdzić czy tytuły są biznesowe ($ i %, nie px)
+- Jeśli nie - dostroić prompt
+
+#### 2. GDPR WEBHOOKS (WYMAGANE DO APP STORE)
+Shopify wymaga 3 webhooków:
+- `customers/data_request` - Klient żąda swoich danych
+- `customers/redact` - Klient żąda usunięcia danych
+- `shop/redact` - Sklep odinstalował app
+
+Pliki do utworzenia:
+- `app/routes/webhooks.customers.data-request.tsx`
+- `app/routes/webhooks.customers.redact.tsx`
+- `app/routes/webhooks.shop.redact.tsx`
+
+#### 3. PRIVACY POLICY & TERMS
+Strony wymagane do App Store:
+- `/app/privacy` - Privacy Policy
+- `/app/terms` - Terms of Service
+
+#### 4. APP STORE LISTING
+- App icon (1200x1200)
+- Screenshots (min 3)
+- Description
+- Pricing plan configuration
+
+---
+
+### 📊 CURRENT PROJECT STATUS
+
+| Component | Status |
+|-----------|--------|
+| Multi-stage Analysis | ✅ Working (12 recs) |
+| Screenshots (external API) | ✅ Working |
+| UI Modal (9 sections) | ✅ Working |
+| Business Wording | ✅ Deployed (needs test) |
+| GDPR Webhooks | ❌ Not started |
+| Privacy/Terms pages | ❌ Not started |
+| App Store Listing | ❌ Not started |
+
+**MVP Progress**: ~95% → App Store Ready: ~70%
+
+---
+
 ## Session #18 - 2026-01-04 (🎨 SCREENSHOTS + UI MODAL ENHANCEMENT)
 
 ### ✅ SCREENSHOTS WORKING + ✅ MODAL ENHANCEMENT 100% COMPLETE
