@@ -154,7 +154,7 @@ export async function callClaudeAPI(
     logger.info(`Sending ${imageContent.length} screenshots to Claude`);
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250514', // ⭐ Claude 4.5 Sonnet - Best quality for CRO analysis
+      model: 'claude-sonnet-4-5-20250929', // ⭐ FLAGSHIP MODEL - Best quality for CRO analysis
       max_tokens: 8192, // ⭐ DOUBLED for more detailed recommendations
       ...(systemPrompt ? { system: systemPrompt } : {}),
       messages: [
@@ -177,7 +177,7 @@ export async function callClaudeAPI(
 
     // Log API usage for cost monitoring
     await logAPIUsage(
-      'claude-sonnet-4-5-20250514',
+      'claude-sonnet-4-5-20250929',
       response.usage.input_tokens,
       response.usage.output_tokens,
       'analysis' // Could pass shop domain if available
