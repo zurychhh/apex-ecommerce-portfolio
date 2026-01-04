@@ -1,6 +1,6 @@
 # APEX eCommerce Portfolio - Project Status
 
-**Last Updated**: 2026-01-04 (Session #18)
+**Last Updated**: 2026-01-04 (Session #20)
 
 ---
 
@@ -94,6 +94,62 @@ The Shopify package detects browser User-Agents and triggers embedded auth flow,
 ---
 
 ## Session History
+
+### Session #20 (2026-01-04) ✅ GDPR & LEGAL PAGES
+**Duration**: ~30min
+**Focus**: App Store compliance - GDPR webhooks and legal pages
+
+**Completed**:
+- ✅ Created 3 GDPR webhooks (required for App Store):
+  - `webhooks.customers.data-request.tsx` - Customer data requests
+  - `webhooks.customers.redact.tsx` - Customer data deletion
+  - `webhooks.shop.redact.tsx` - Full shop data deletion
+- ✅ Created Privacy Policy page (`/privacy`)
+- ✅ Created Terms of Service page (`/terms`)
+- ✅ Deployed and verified (HTTP 200)
+
+**Files Created**:
+- `app/routes/webhooks.customers.data-request.tsx`
+- `app/routes/webhooks.customers.redact.tsx`
+- `app/routes/webhooks.shop.redact.tsx`
+- `app/routes/privacy.tsx`
+- `app/routes/terms.tsx`
+
+**Commits**:
+- `a1da613` - `feat: Add GDPR webhooks and legal pages for App Store compliance`
+
+**Status**: ✅ COMPLETE - Ready for App Store submission
+
+---
+
+### Session #19 (2026-01-04) 📝 BUSINESS WORDING + MODAL COMPLETE
+**Duration**: ~1h
+**Focus**: Business-first recommendation titles, UI Modal enhancement (100%)
+
+**Completed**:
+- ✅ UI Modal Enhancement - all 9 sections working:
+  - Impact & Effort stars
+  - ROI metrics
+  - Testing Checklist (interactive checkboxes)
+  - Common Pitfalls (yellow warning box)
+  - Helpful Resources (clickable links)
+- ✅ Business-first recommendation wording:
+  - Titles now include: $revenue, %conversion, customer count
+  - No technical metrics: px, fold, viewport
+  - Example: "Recover $2,250/mo from 340 shoppers who miss your Add to Cart"
+
+**Files Modified**:
+- `app/utils/multi-stage-analysis.server.ts` - Stage 3 prompt for CEO audience
+- `app/utils/recommendation-helpers.ts` - Added helper functions
+- `app/components/EnhancedRecommendationModal.tsx` - Added 3 new sections
+
+**Commits**:
+- `636f98d` - `feat: Add enhanced recommendation modal with syntax highlighting`
+- `0cb5713` - `feat: Business-first recommendation wording for CEO audience`
+
+**Status**: ✅ COMPLETE
+
+---
 
 ### Session #18 (2026-01-04) 🎨 SCREENSHOTS + UI MODAL ENHANCEMENT
 **Duration**: ~1.5h
@@ -399,12 +455,12 @@ Shopify package detects browser User-Agents and triggers embedded auth flow. Thi
 ### MVP Features
 - [x] Shopify OAuth integration
 - [x] Store data fetching (Analytics, Products, Themes)
-- [x] Screenshot capture (Playwright)
-- [x] AI analysis (Claude Sonnet + Vision)
-- [x] Recommendations with prioritization
+- [x] Screenshot capture (External API - ScreenshotOne)
+- [x] AI analysis (Claude Sonnet 4.5 + Vision)
+- [x] Recommendations with prioritization (12 per analysis)
 - [x] Dashboard UI (Polaris)
-- [x] Recommendation detail view
-- [x] Code snippet viewer
+- [x] Recommendation detail view (Enhanced Modal)
+- [x] Code snippet viewer (Syntax highlighting)
 - [x] Billing integration (Shopify Billing API)
 - [x] Email notifications (Resend)
 - [x] Weekly auto-refresh (cron endpoint)
@@ -414,8 +470,12 @@ Shopify package detects browser User-Agents and triggers embedded auth flow. Thi
 - [x] Documentation complete
 - [x] E2E API Health Checks executed (5/5 PASS)
 - [x] **Fix HTTP 500 in iframe** *(FIXED - Session #11)*
-- [ ] External cron service configuration *(manual - cron-job.org)*
-- [ ] E2E browser tests on dev store *(ready to execute)*
+- [x] **GDPR Webhooks** *(3/3 Complete - Session #20)*
+- [x] **Privacy Policy** *(Live at /privacy - Session #20)*
+- [x] **Terms of Service** *(Live at /terms - Session #20)*
+- [x] **Business-first wording** *(Session #19)*
+- [ ] External cron service configuration *(optional - cron-job.org)*
+- [ ] App Store listing assets *(icons, screenshots)*
 
 ### Post-MVP
 - [ ] Competitor tracking
@@ -515,31 +575,44 @@ All critical issues have been resolved. The app is functional and ready for fina
 
 ## Next Session Priorities
 
-### ✅ ALL MAJOR MILESTONES COMPLETE
+### ✅ APP STORE COMPLIANCE COMPLETE
 
-The app is now **PRODUCTION READY**. All critical tests pass:
-- ✅ AI Analysis verified working (8 recommendations with ROI ~$41K/mo)
+The app is now **READY FOR SHOPIFY APP STORE SUBMISSION**:
+- ✅ AI Analysis working (12 recommendations with business-focused titles)
 - ✅ E2E Browser Tests: 7/7 (100%) PASS
 - ✅ Performance Grade: A
+- ✅ GDPR Webhooks: 3/3 Complete
+- ✅ Privacy Policy: Live at `/privacy`
+- ✅ Terms of Service: Live at `/terms`
+- ✅ Business-first wording implemented
 
-### Remaining Tasks (Optional)
+### Remaining for App Store Submission
+
+1. **Register GDPR Webhooks** in Shopify Partner Dashboard (5 min)
+   - `https://conversionai-web-production.up.railway.app/webhooks/customers/data-request`
+   - `https://conversionai-web-production.up.railway.app/webhooks/customers/redact`
+   - `https://conversionai-web-production.up.railway.app/webhooks/shop/redact`
+
+2. **App Store Listing Assets** (1-2 hours)
+   - App icon (1200x1200 PNG)
+   - Screenshots (3-5 showing key features)
+   - Short description (max 100 chars)
+   - Detailed description
+   - Demo video (optional but recommended)
+
+3. **Submit for Review** (5-7 business days)
+   - Complete App Store listing form
+   - Link Privacy Policy URL
+   - Link Terms of Service URL
+
+### Optional Tasks
 
 1. **Configure cron-job.org** (15 min)
-   - Set up weekly refresh calls
-   - Verify CRON_SECRET is working
    - URL: `POST https://conversionai-web-production.up.railway.app/api/cron/weekly-refresh`
    - Header: `Authorization: Bearer <CRON_SECRET>`
    - Schedule: Every Monday 9:00 AM UTC
 
-2. **Re-enable Multi-Stage Analysis** (Future)
-   - Currently disabled due to timeout (~3 min > Railway 60s limit)
-   - Requires background job processing with webhook callback
-   - Low priority since single-shot works well
-
-3. **Submit to Shopify App Store** (1-2 hours)
-   - Prepare app listing
-   - Screenshots and demo video
-   - Privacy policy and terms
+2. **Multi-Stage Analysis** already working (12 recommendations per run)
 
 ### How to Re-run E2E Tests
 ```bash
