@@ -1,6 +1,6 @@
 # APEX eCommerce Portfolio - Project Status
 
-**Last Updated**: 2026-01-03 (Session #16)
+**Last Updated**: 2026-01-04 (Session #18)
 
 ---
 
@@ -94,6 +94,63 @@ The Shopify package detects browser User-Agents and triggers embedded auth flow,
 ---
 
 ## Session History
+
+### Session #18 (2026-01-04) 🎨 SCREENSHOTS + UI MODAL ENHANCEMENT
+**Duration**: ~1.5h
+**Focus**: External screenshot API, Enhanced Recommendation Modal
+
+**Completed**:
+- ✅ Implemented external screenshot API (ScreenshotOne.com) - Playwright Docker failed on Railway
+- ✅ Added `SCREENSHOT_API_KEY` to Railway environment
+- ✅ Screenshots now captured: homepage (`/`) + collections (`/collections/all`)
+- ✅ Claude receives visual context for better recommendations
+- ✅ Created enhanced recommendation modal with syntax highlighting
+- ✅ Added react-syntax-highlighter for code display
+- ✅ Created CodeSnippet.tsx component
+- ✅ Created EnhancedRecommendationModal.tsx component
+- ✅ Updated recommendations list to use modal instead of page navigation
+
+**Screenshot Integration Results**:
+| Metric | Before | After |
+|--------|--------|-------|
+| Input tokens | 7,076 | 9,940 (+40%) |
+| Screenshots | 0 | 2 |
+| Quality score | 91/100 | 92/100 |
+
+**Files Created**:
+- `app/utils/screenshot-service.server.ts` - External API client
+- `app/components/CodeSnippet.tsx` - Syntax highlighted code
+- `app/components/EnhancedRecommendationModal.tsx` - Full-featured modal
+- `app/types/recommendation.types.ts` - TypeScript interfaces
+- `app/utils/recommendation-helpers.ts` - Helper functions
+
+**Commits**:
+- `636f98d` - `feat: Add enhanced recommendation modal with syntax highlighting`
+- `368fea6` - `feat: Use external screenshot API instead of Playwright Docker`
+
+**Status**: ✅ Screenshots working, Modal enhancement in progress
+
+---
+
+### Session #17 (2026-01-03) 🎉 MULTI-STAGE ANALYSIS COMPLETE
+**Duration**: ~1h
+**Focus**: Multi-stage 3-phase AI analysis with 12 recommendations
+
+**Completed**:
+- ✅ Multi-stage analysis fully working (3 phases)
+- ✅ 12 high-quality recommendations generated per analysis
+- ✅ Bull queue background processing (bypasses 60s timeout)
+- ✅ Progress UI with animated bar (10%→90%)
+- ✅ Auto-refresh polling every 15s
+
+**Files Modified**:
+- `app/utils/multi-stage-analysis.server.ts` - Added fallback handlers
+- `app/jobs/analyzeStore.ts` - Enabled multi-stage flag
+- `app/routes/app.analysis.start.tsx` - Uses queue instead of sync
+
+**Status**: ✅ COMPLETE
+
+---
 
 ### Session #16 (2026-01-03) 🔧 AI ANALYSIS JSON FIX
 **Duration**: ~30min
