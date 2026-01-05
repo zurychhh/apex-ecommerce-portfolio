@@ -3,7 +3,7 @@
 **Date**: January 5, 2026
 **App Version**: 1.0.0
 **Developer**: ApexMind AI Labs
-**Contact**: support@apexmind.ai
+**Contact**: rafal@oleksiakconsulting.com
 
 ---
 
@@ -96,7 +96,7 @@ ConversionAI is an AI-powered conversion rate optimization (CRO) app for Shopify
 - **File**: `app/routes/support.tsx`
 
 **Content Included:**
-- [x] Contact email: support@apexmind.ai
+- [x] Contact email: rafal@oleksiakconsulting.com
 - [x] Response time: within 24 hours
 - [x] FAQ section (7 questions)
 - [x] Getting started guide
@@ -301,7 +301,7 @@ All requirements met. App is ready for Shopify App Store review.
    - URL: https://partners.shopify.com/4661608/apps/7638204481584
 
 2. **Configure Support Email**
-   - Set up support@apexmind.ai inbox
+   - Set up rafal@oleksiakconsulting.com inbox
 
 3. **Upload Assets in Partner Dashboard**
    - App icon: `docs/app-icon.png`
@@ -316,7 +316,7 @@ All requirements met. App is ready for Shopify App Store review.
 ## Support Contact
 
 For issues during review:
-- **Email**: support@apexmind.ai
+- **Email**: rafal@oleksiakconsulting.com
 - **Response time**: <24 hours (business hours CET)
 - **Urgent**: Mark subject "[URGENT - APP REVIEW]"
 

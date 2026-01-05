@@ -18,7 +18,7 @@ export default function Support() {
         <h2 style={{ fontSize: "1.25rem", marginBottom: "1rem", color: "#2563EB" }}>Contact Us</h2>
         <p style={{ marginBottom: "0.5rem" }}>
           <strong>Email:</strong>{" "}
-          <a href="mailto:support@apexmind.ai" style={{ color: "#2563EB" }}>support@apexmind.ai</a>
+          <a href="mailto:rafal@oleksiakconsulting.com" style={{ color: "#2563EB" }}>rafal@oleksiakconsulting.com</a>
         </p>
         <p style={{ marginBottom: "0.5rem" }}>
           <strong>Response Time:</strong> Within 24 hours (usually much faster during business hours CET)

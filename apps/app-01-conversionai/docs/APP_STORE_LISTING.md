@@ -113,7 +113,7 @@ conversion rate optimization, CRO, AI analysis, revenue optimization, store anal
 | App URL | https://conversionai-web-production.up.railway.app |
 | Privacy Policy | https://conversionai-web-production.up.railway.app/privacy |
 | Terms of Service | https://conversionai-web-production.up.railway.app/terms |
-| Support Email | support@apexmind.ai (configure this) |
+| Support Email | rafal@oleksiakconsulting.com (configure this) |
 
 ---
 
@@ -147,6 +147,6 @@ Webhooks registered in `conversionai-14`:
 ## Notes for Submission
 
 1. **App Icon**: Create a 1200x1200 PNG icon using the ApexMind brand colors
-2. **Support Email**: Configure support@apexmind.ai or similar
+2. **Support Email**: Configure rafal@oleksiakconsulting.com or similar
 3. **Partner Registration**: Complete the $19 one-time App Store registration fee
 4. **Demo Video**: Optional but recommended - consider creating a 1-2 min demo
