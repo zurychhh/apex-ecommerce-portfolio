@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
           <li>Export your recommendations</li>
         </ul>
         <p style={{ marginTop: "0.5rem" }}>
-          To exercise these rights, contact us at privacy@conversionai.app or uninstall the app from your Shopify admin.
+          To exercise these rights, contact us at support@apexmind.ai or uninstall the app from your Shopify admin.
         </p>
       </section>
 
@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
         <h2 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>9. Contact Us</h2>
         <p>
           For questions about this Privacy Policy, contact us at:<br />
-          Email: privacy@conversionai.app
+          Email: support@apexmind.ai
         </p>
       </section>
 

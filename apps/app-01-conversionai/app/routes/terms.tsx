@@ -46,6 +46,12 @@ export default function TermsOfService() {
           <strong>Free Trial:</strong> New users may receive a free trial period. You will not be charged
           until the trial ends and you confirm your subscription.
         </p>
+        <p style={{ marginTop: "0.5rem" }}>
+          <strong>Refund Policy:</strong> Refunds are handled through Shopify's billing system. If you are
+          unsatisfied with ConversionAI, you may cancel your subscription at any time. Refunds for the
+          current billing period may be requested within 7 days of payment by contacting support@apexmind.ai.
+          We review refund requests on a case-by-case basis.
+        </p>
       </section>
 
       <section style={{ marginBottom: "2rem" }}>
@@ -132,7 +138,7 @@ export default function TermsOfService() {
         <h2 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>11. Contact Us</h2>
         <p>
           For questions about these Terms of Service, contact us at:<br />
-          Email: support@conversionai.app
+          Email: support@apexmind.ai
         </p>
       </section>
 
