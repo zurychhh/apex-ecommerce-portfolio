@@ -181,17 +181,25 @@ export default function RecommendationsIndex() {
   const getImpactBadge = (score: number) => {
     if (score >= 4) return (
       <span className="brand-badge-purple">
-        <Badge tone="success">High Impact</Badge>
+        <Badge>High Impact</Badge>
       </span>
     );
-    if (score >= 3) return <Badge tone="info">Medium Impact</Badge>;
-    return <Badge>Low Impact</Badge>;
+    if (score >= 3) return (
+      <span className="brand-badge-blue">
+        <Badge>Medium Impact</Badge>
+      </span>
+    );
+    return (
+      <span className="brand-badge-gray">
+        <Badge>Low Impact</Badge>
+      </span>
+    );
   };
 
   const getEffortBadge = (score: number) => {
     if (score <= 2) return (
       <span className="brand-badge-green">
-        <Badge tone="success">Easy</Badge>
+        <Badge>Easy</Badge>
       </span>
     );
     if (score <= 3) return <Badge tone="warning">Medium</Badge>;
@@ -203,13 +211,21 @@ export default function RecommendationsIndex() {
       case 'implemented':
         return (
           <span className="brand-badge-green">
-            <Badge tone="success">Implemented</Badge>
+            <Badge>Implemented</Badge>
           </span>
         );
       case 'skipped':
-        return <Badge>Skipped</Badge>;
+        return (
+          <span className="brand-badge-gray">
+            <Badge>Skipped</Badge>
+          </span>
+        );
       default:
-        return <Badge tone="attention">Pending</Badge>;
+        return (
+          <span className="brand-badge-amber">
+            <Badge>Pending</Badge>
+          </span>
+        );
     }
   };
 

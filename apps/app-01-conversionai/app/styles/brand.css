@@ -8,41 +8,100 @@
   --brand-apex-purple-hover: #6d28d9;
   --brand-growth-green: #10B981;
   --brand-growth-green-hover: #059669;
+  --brand-amber: #F59E0B;
+  --brand-gray: #6B7280;
   --brand-carbon: #0F172A;
 }
 
-/* Brand Primary Button Override */
+/* ============================================
+   PRIMARY BUTTONS - Neural Blue #2563EB
+   ============================================ */
+
+/* Wrapper approach - set CSS custom properties for Polaris */
 .brand-primary-button {
-  --p-color-bg-fill-brand: var(--brand-neural-blue);
-  --p-color-bg-fill-brand-hover: var(--brand-neural-blue-hover);
-  --p-color-bg-fill-brand-active: var(--brand-neural-blue-active);
+  --p-color-bg-fill-brand: #2563EB !important;
+  --p-color-bg-fill-brand-hover: #1e40af !important;
+  --p-color-bg-fill-brand-active: #1e3a8a !important;
 }
 
-/* Brand Success/Growth Button */
-.brand-success-button {
-  --p-color-bg-fill-success: var(--brand-growth-green);
-  --p-color-bg-fill-success-hover: var(--brand-growth-green-hover);
+/* Direct button override for maximum specificity */
+.brand-primary-button button[class*="Button--primary"],
+.brand-primary-button button[class*="Button--variantPrimary"],
+.brand-primary-button [class*="Polaris-Button--primary"] {
+  background-color: #2563EB !important;
+  border-color: #2563EB !important;
+  background: #2563EB !important;
 }
 
-/* Brand Badge Styles */
-.brand-badge-purple {
-  background-color: var(--brand-apex-purple) !important;
+.brand-primary-button button[class*="Button--primary"]:hover,
+.brand-primary-button button[class*="Button--variantPrimary"]:hover,
+.brand-primary-button [class*="Polaris-Button--primary"]:hover {
+  background-color: #1e40af !important;
+  border-color: #1e40af !important;
+  background: #1e40af !important;
+}
+
+.brand-primary-button button[class*="Button--primary"]:active,
+.brand-primary-button button[class*="Button--variantPrimary"]:active,
+.brand-primary-button [class*="Polaris-Button--primary"]:active {
+  background-color: #1e3a8a !important;
+  border-color: #1e3a8a !important;
+  background: #1e3a8a !important;
+}
+
+/* ============================================
+   BADGE STYLES - Brand Palette
+   ============================================ */
+
+/* Apex Purple - for "Most Popular", "High Impact" */
+.brand-badge-purple span[class*="Badge"],
+.brand-badge-purple [class*="Polaris-Badge"] {
+  background-color: #7C3AED !important;
   color: white !important;
+  border-color: #7C3AED !important;
 }
 
-.brand-badge-blue {
-  background-color: var(--brand-neural-blue) !important;
+/* Neural Blue - for category badges, "Medium Impact" */
+.brand-badge-blue span[class*="Badge"],
+.brand-badge-blue [class*="Polaris-Badge"] {
+  background-color: #2563EB !important;
   color: white !important;
+  border-color: #2563EB !important;
 }
 
-.brand-badge-green {
-  background-color: var(--brand-growth-green) !important;
+/* Growth Green - for "Implemented", success states */
+.brand-badge-green span[class*="Badge"],
+.brand-badge-green [class*="Polaris-Badge"] {
+  background-color: #10B981 !important;
   color: white !important;
+  border-color: #10B981 !important;
 }
 
-/* Popular Badge Accent */
-.brand-popular-badge [class*="Badge"] {
-  background-color: var(--brand-apex-purple) !important;
+/* Amber - for "Pending" status */
+.brand-badge-amber span[class*="Badge"],
+.brand-badge-amber [class*="Polaris-Badge"] {
+  background-color: #F59E0B !important;
   color: white !important;
-  font-weight: 600;
+  border-color: #F59E0B !important;
+}
+
+/* Gray - for "Skipped", low priority */
+.brand-badge-gray span[class*="Badge"],
+.brand-badge-gray [class*="Polaris-Badge"] {
+  background-color: #6B7280 !important;
+  color: white !important;
+  border-color: #6B7280 !important;
+}
+
+/* ============================================
+   MOST POPULAR BADGE - Special Styling
+   ============================================ */
+.brand-most-popular span[class*="Badge"],
+.brand-most-popular [class*="Polaris-Badge"] {
+  background-color: #7C3AED !important;
+  color: white !important;
+  border-color: #7C3AED !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
 }

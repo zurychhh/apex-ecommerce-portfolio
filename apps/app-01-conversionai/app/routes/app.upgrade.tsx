@@ -91,7 +91,7 @@ export default function UpgradePage() {
                       </Text>
                       {isPopular && (
                         <span className="brand-badge-purple">
-                          <Badge tone="success">Most Popular</Badge>
+                          <Badge>Most Popular</Badge>
                         </span>
                       )}
                       {isCurrentPlan && <Badge>Current Plan</Badge>}
@@ -146,10 +146,10 @@ export default function UpgradePage() {
                       ) : (
                         <Form method="post" action="/api/billing/create">
                           <input type="hidden" name="plan" value={plan.id} />
-                          <div className={isPopular ? 'brand-primary-button' : ''}>
+                          <div className="brand-primary-button">
                             <Button
                               submit
-                              variant={isPopular ? 'primary' : 'secondary'}
+                              variant="primary"
                               fullWidth
                             >
                               {currentPlan === 'free'

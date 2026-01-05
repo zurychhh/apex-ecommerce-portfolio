@@ -127,20 +127,24 @@ export function EnhancedRecommendationModal({
 
           {/* Badges Row */}
           <InlineStack gap="200" wrap>
-            <Badge tone={categoryInfo.color}>{categoryInfo.label}</Badge>
+            <span className="brand-badge-blue">
+              <Badge>{categoryInfo.label}</Badge>
+            </span>
             <Badge tone={effort.color}>{effort.text}</Badge>
-            <Badge
-              tone={
-                recommendation.status === 'implemented'
-                  ? 'success'
-                  : recommendation.status === 'skipped'
-                  ? undefined
-                  : 'attention'
-              }
-            >
-              {recommendation.status}
-            </Badge>
-            {confidence && <Badge tone="info">{confidence}% confidence</Badge>}
+            <span className={
+              recommendation.status === 'implemented'
+                ? 'brand-badge-green'
+                : recommendation.status === 'skipped'
+                ? 'brand-badge-gray'
+                : 'brand-badge-amber'
+            }>
+              <Badge>{recommendation.status}</Badge>
+            </span>
+            {confidence && (
+              <span className="brand-badge-blue">
+                <Badge>{confidence}% confidence</Badge>
+              </span>
+            )}
           </InlineStack>
 
           {/* Metrics Grid */}
