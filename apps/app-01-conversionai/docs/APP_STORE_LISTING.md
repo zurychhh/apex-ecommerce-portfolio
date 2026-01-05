@@ -42,9 +42,10 @@ ConversionAI analyzes your Shopify store and generates specific, actionable reco
 
 **Pricing:**
 
-- **Free Plan**: 1 analysis per month
-- **Pro Plan ($29/mo)**: Unlimited analyses, weekly auto-refresh, priority support
-- **Enterprise ($99/mo)**: API access, custom integrations, dedicated support
+- **Free Plan**: 1 analysis per month, up to 10 recommendations
+- **Basic Plan ($29/mo)**: 4 analyses/month, 20 recommendations, email notifications
+- **Pro Plan ($79/mo)**: 12 analyses/month, 50 recommendations, weekly auto-refresh, priority support
+- **Enterprise ($199/mo)**: Unlimited analyses, unlimited recommendations, API access, dedicated support
 
 **Why Merchants Love ConversionAI:**
 
