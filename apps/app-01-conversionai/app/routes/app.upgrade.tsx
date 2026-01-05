@@ -18,6 +18,7 @@ import {
   Box,
   Divider,
 } from '@shopify/polaris';
+import { BrandedFooter } from '../components/BrandedFooter';
 import { CheckIcon } from '@shopify/polaris-icons';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
@@ -72,7 +73,7 @@ export default function UpgradePage() {
     <Page
       title="Choose Your Plan"
       backAction={{ url: '/app' }}
-      subtitle="Unlock more features and grow your conversion rate"
+      subtitle="ConversionAI by ApexMind AI Labs | Unlock more features and grow your conversion rate"
     >
       <Layout>
         {plans.map((plan) => {
@@ -88,7 +89,11 @@ export default function UpgradePage() {
                       <Text as="h2" variant="headingLg">
                         {plan.name}
                       </Text>
-                      {isPopular && <Badge tone="success">Most Popular</Badge>}
+                      {isPopular && (
+                        <span className="brand-badge-purple">
+                          <Badge tone="success">Most Popular</Badge>
+                        </span>
+                      )}
                       {isCurrentPlan && <Badge>Current Plan</Badge>}
                     </InlineStack>
 
@@ -141,15 +146,17 @@ export default function UpgradePage() {
                       ) : (
                         <Form method="post" action="/api/billing/create">
                           <input type="hidden" name="plan" value={plan.id} />
-                          <Button
-                            submit
-                            variant={isPopular ? 'primary' : 'secondary'}
-                            fullWidth
-                          >
-                            {currentPlan === 'free'
-                              ? `Start ${plan.trialDays}-Day Trial`
-                              : `Upgrade to ${plan.name}`}
-                          </Button>
+                          <div className={isPopular ? 'brand-primary-button' : ''}>
+                            <Button
+                              submit
+                              variant={isPopular ? 'primary' : 'secondary'}
+                              fullWidth
+                            >
+                              {currentPlan === 'free'
+                                ? `Start ${plan.trialDays}-Day Trial`
+                                : `Upgrade to ${plan.name}`}
+                            </Button>
+                          </div>
                         </Form>
                       )}
                     </Box>
@@ -204,6 +211,8 @@ export default function UpgradePage() {
           </Box>
         </Card>
       </Box>
+
+      <BrandedFooter />
     </Page>
   );
 }

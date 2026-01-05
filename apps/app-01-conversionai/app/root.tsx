@@ -13,6 +13,11 @@ export default function App() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="application-name" content="ConversionAI by ApexMind AI Labs" />
+        <meta name="author" content="ApexMind AI Labs" />
+        <meta name="theme-color" content="#2563EB" />
+        <meta property="og:site_name" content="ConversionAI by ApexMind" />
+        <meta property="og:type" content="website" />
         <link rel="preconnect" href="https://cdn.shopify.com/" />
         <link
           rel="stylesheet"

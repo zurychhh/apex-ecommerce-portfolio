@@ -12,6 +12,7 @@ import {
   InlineStack,
   Box,
 } from '@shopify/polaris';
+import { BrandedFooter } from '../components/BrandedFooter';
 import { useState, useCallback, useEffect } from 'react';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
@@ -178,13 +179,21 @@ export default function RecommendationsIndex() {
   });
 
   const getImpactBadge = (score: number) => {
-    if (score >= 4) return <Badge tone="success">High Impact</Badge>;
+    if (score >= 4) return (
+      <span className="brand-badge-purple">
+        <Badge tone="success">High Impact</Badge>
+      </span>
+    );
     if (score >= 3) return <Badge tone="info">Medium Impact</Badge>;
     return <Badge>Low Impact</Badge>;
   };
 
   const getEffortBadge = (score: number) => {
-    if (score <= 2) return <Badge tone="success">Easy</Badge>;
+    if (score <= 2) return (
+      <span className="brand-badge-green">
+        <Badge tone="success">Easy</Badge>
+      </span>
+    );
     if (score <= 3) return <Badge tone="warning">Medium</Badge>;
     return <Badge tone="critical">Complex</Badge>;
   };
@@ -192,7 +201,11 @@ export default function RecommendationsIndex() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'implemented':
-        return <Badge tone="success">Implemented</Badge>;
+        return (
+          <span className="brand-badge-green">
+            <Badge tone="success">Implemented</Badge>
+          </span>
+        );
       case 'skipped':
         return <Badge>Skipped</Badge>;
       default:
@@ -255,7 +268,7 @@ export default function RecommendationsIndex() {
   return (
     <Page
       title="Recommendations"
-      subtitle={`${pendingCount} pending · ${implementedCount} implemented · ${recommendations.length} total`}
+      subtitle={`${pendingCount} pending · ${implementedCount} implemented · ${recommendations.length} total | ConversionAI by ApexMind`}
       backAction={{ url: '/app' }}
       primaryAction={{ content: 'Refresh Analysis', url: '/app/analysis/start' }}
     >
@@ -306,7 +319,9 @@ export default function RecommendationsIndex() {
                       </Text>
                     </InlineStack>
                     <InlineStack gap="200">
-                      <Badge>{rec.category.replace(/_/g, ' ')}</Badge>
+                      <span className="brand-badge-blue">
+                        <Badge>{rec.category.replace(/_/g, ' ')}</Badge>
+                      </span>
                       {getImpactBadge(rec.impactScore)}
                       {getEffortBadge(rec.effortScore)}
                       {getStatusBadge(rec.status)}
@@ -328,9 +343,11 @@ export default function RecommendationsIndex() {
                 </InlineStack>
 
                 <InlineStack gap="200">
-                  <Button onClick={() => handleOpenModal(rec)} variant="primary">
-                    View Details
-                  </Button>
+                  <div className="brand-primary-button">
+                    <Button onClick={() => handleOpenModal(rec)} variant="primary">
+                      View Details
+                    </Button>
+                  </div>
                   {rec.status !== 'implemented' && (
                     <Button
                       onClick={() => handleStatusChange(rec.id, 'implement')}
@@ -370,6 +387,8 @@ export default function RecommendationsIndex() {
             </Box>
           </Card>
         )}
+
+        <BrandedFooter />
       </BlockStack>
 
       {/* Enhanced Recommendation Modal */}

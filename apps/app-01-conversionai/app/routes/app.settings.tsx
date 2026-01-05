@@ -1,4 +1,5 @@
-import { Page, Layout, Card, Text, FormLayout, TextField, Button, BlockStack } from '@shopify/polaris';
+import { Page, Layout, Card, Text, FormLayout, TextField, Button, BlockStack, Box } from '@shopify/polaris';
+import { BrandedFooter } from '../components/BrandedFooter';
 import { useState } from 'react';
 
 export default function Settings() {
@@ -13,7 +14,7 @@ export default function Settings() {
   };
 
   return (
-    <Page title="Settings">
+    <Page title="Settings" subtitle="ConversionAI by ApexMind AI Labs">
       <Layout>
         <Layout.Section>
           <Card>
@@ -28,14 +29,20 @@ export default function Settings() {
                   onChange={(value) => setSettings({ ...settings, analysisDepth: value })}
                   autoComplete="off"
                 />
-                <Button variant="primary" onClick={handleSave}>
-                  Save Settings
-                </Button>
+                <div className="brand-primary-button">
+                  <Button variant="primary" onClick={handleSave}>
+                    Save Settings
+                  </Button>
+                </div>
               </FormLayout>
             </BlockStack>
           </Card>
         </Layout.Section>
       </Layout>
+
+      <Box paddingBlockStart="800">
+        <BrandedFooter />
+      </Box>
     </Page>
   );
 }

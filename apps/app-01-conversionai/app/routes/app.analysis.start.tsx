@@ -1,6 +1,7 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from '@remix-run/node';
 import { Form, useLoaderData, useNavigation, useActionData } from '@remix-run/react';
-import { Page, Card, Text, Button, Select, Banner } from '@shopify/polaris';
+import { Page, Card, Text, Button, Select, Banner, BlockStack } from '@shopify/polaris';
+import { BrandedFooter } from '../components/BrandedFooter';
 import { useState } from 'react';
 import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
@@ -106,9 +107,11 @@ export default function StartAnalysis() {
   return (
     <Page
       title="Start Analysis"
+      subtitle="ConversionAI by ApexMind AI Labs"
       backAction={{ url: '/app' }}
     >
-      {actionData?.error && (
+      <BlockStack gap="500">
+        {actionData?.error && (
         <div style={{ marginBottom: '16px' }}>
           <Banner tone="critical">
             <p><strong>Error:</strong> {actionData.error}</p>
@@ -152,9 +155,11 @@ export default function StartAnalysis() {
             <input type="hidden" name="primaryGoalLabel" value={goalLabels[selectedGoal] || selectedGoal} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Button submit variant="primary" loading={isSubmitting} disabled={!selectedGoal}>
-                {isSubmitting ? 'Starting Analysis...' : 'Start Analysis'}
-              </Button>
+              <div className="brand-primary-button">
+                <Button submit variant="primary" loading={isSubmitting} disabled={!selectedGoal}>
+                  {isSubmitting ? 'Starting Analysis...' : 'Start Analysis'}
+                </Button>
+              </div>
               <Button url="/app">Cancel</Button>
             </div>
           </Form>
@@ -175,6 +180,9 @@ export default function StartAnalysis() {
           </div>
         </div>
       </Card>
+
+        <BrandedFooter />
+      </BlockStack>
     </Page>
   );
 }

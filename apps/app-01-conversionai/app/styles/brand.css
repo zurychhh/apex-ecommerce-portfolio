@@ -1,0 +1,48 @@
+/* ApexMind AI Labs Brand Colors */
+
+:root {
+  --brand-neural-blue: #2563EB;
+  --brand-neural-blue-hover: #1e40af;
+  --brand-neural-blue-active: #1e3a8a;
+  --brand-apex-purple: #7C3AED;
+  --brand-apex-purple-hover: #6d28d9;
+  --brand-growth-green: #10B981;
+  --brand-growth-green-hover: #059669;
+  --brand-carbon: #0F172A;
+}
+
+/* Brand Primary Button Override */
+.brand-primary-button {
+  --p-color-bg-fill-brand: var(--brand-neural-blue);
+  --p-color-bg-fill-brand-hover: var(--brand-neural-blue-hover);
+  --p-color-bg-fill-brand-active: var(--brand-neural-blue-active);
+}
+
+/* Brand Success/Growth Button */
+.brand-success-button {
+  --p-color-bg-fill-success: var(--brand-growth-green);
+  --p-color-bg-fill-success-hover: var(--brand-growth-green-hover);
+}
+
+/* Brand Badge Styles */
+.brand-badge-purple {
+  background-color: var(--brand-apex-purple) !important;
+  color: white !important;
+}
+
+.brand-badge-blue {
+  background-color: var(--brand-neural-blue) !important;
+  color: white !important;
+}
+
+.brand-badge-green {
+  background-color: var(--brand-growth-green) !important;
+  color: white !important;
+}
+
+/* Popular Badge Accent */
+.brand-popular-badge [class*="Badge"] {
+  background-color: var(--brand-apex-purple) !important;
+  color: white !important;
+  font-weight: 600;
+}

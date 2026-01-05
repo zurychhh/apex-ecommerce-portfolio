@@ -14,6 +14,7 @@ import {
   Box,
   Badge,
 } from "@shopify/polaris";
+import { BrandedFooter } from "../components/BrandedFooter";
 import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import { prisma } from "../utils/db.server";
@@ -163,6 +164,7 @@ export default function Dashboard() {
   return (
     <Page
       title="ConversionAI Dashboard"
+      subtitle="by ApexMind AI Labs"
       primaryAction={{
         content: isAnalyzing ? "Analyzing..." : "Run New Analysis",
         url: "/app/analysis/start",
@@ -350,9 +352,11 @@ export default function Dashboard() {
                       : "No recommendations yet. Run your first analysis to get started!"}
                   </Text>
                   {!isAnalyzing && (
-                    <Button url="/app/analysis/start" variant="primary">
-                      Start Analysis
-                    </Button>
+                    <div className="brand-primary-button">
+                      <Button url="/app/analysis/start" variant="primary">
+                        Start Analysis
+                      </Button>
+                    </div>
                   )}
                 </BlockStack>
               ) : (
@@ -394,6 +398,8 @@ export default function Dashboard() {
             </BlockStack>
           </Box>
         </Card>
+
+        <BrandedFooter />
       </BlockStack>
     </Page>
   );
