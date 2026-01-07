@@ -542,5 +542,101 @@ Waiting for:
 
 ---
 
+---
+
+## Session #2 (continued) - Railway Deployment via API
+
+**Date**: 2026-01-07
+**Duration**: ~1 hour
+**Status**: ⚠️ IN PROGRESS - Build succeeds, runtime crash needs debugging
+
+### Summary
+
+Deployed ReviewBoost AI to Railway using the GraphQL API. App builds successfully but crashes on startup - requires manual debugging via Railway Dashboard logs.
+
+---
+
+### Tasks Completed
+
+#### Task 1: Railway Service Creation ✅
+**Via Railway GraphQL API:**
+- Created `reviewboost-web` service (ID: `2ad2b404-a81c-47cc-9ab4-c9b0f471b77c`)
+- Connected GitHub repo: `zurychhh/apex-ecommerce-portfolio`
+- Set root directory via `serviceInstanceUpdate`
+- Created Railway domain: `reviewboost-web-production.up.railway.app`
+
+#### Task 2: Environment Variables ✅
+**Configured via API:**
+- `NODE_ENV`: production
+- `SCOPES`: read_products,write_products,read_content,write_content
+- `SHOPIFY_APP_URL`: https://reviewboost-web-production.up.railway.app
+- `DATABASE_URL`: postgresql://conversionai:***@turntable.proxy.rlwy.net:50904/conversionai
+- `REDIS_URL`: redis://mainline.proxy.rlwy.net:43368
+- `HOST`: 0.0.0.0
+- `CRON_SECRET`: (generated)
+- `SHOPIFY_API_KEY`: PLACEHOLDER_NEEDS_UPDATE
+- `SHOPIFY_API_SECRET`: PLACEHOLDER_NEEDS_UPDATE
+- `ANTHROPIC_API_KEY`: PLACEHOLDER_NEEDS_UPDATE
+
+#### Task 3: Build Configuration ✅
+**Files updated:**
+- `nixpacks.toml` - Fixed order: prisma generate before build
+- `railway.json` - Added for deployment configuration
+
+**Build status:** ✅ SUCCESS
+**Runtime status:** ❌ CRASHED
+
+---
+
+### Railway Service IDs
+
+```
+Service ID (reviewboost-web): 2ad2b404-a81c-47cc-9ab4-c9b0f471b77c
+Domain: reviewboost-web-production.up.railway.app
+Domain ID: 56a1e10c-61c6-47ef-8019-2f4b01095d58
+```
+
+---
+
+### Issue: Runtime Crash
+
+**Status:** App builds successfully but crashes on startup.
+
+**Possible causes:**
+1. Placeholder API keys (SHOPIFY_API_KEY, SHOPIFY_API_SECRET, ANTHROPIC_API_KEY)
+2. Prisma migration failure
+3. Missing environment configuration
+
+**Debug steps required:**
+1. Check Railway Dashboard logs at: https://railway.app/project/c1ad5a4a-a4ff-4698-bf0f-e1f950623869/service/2ad2b404-a81c-47cc-9ab4-c9b0f471b77c
+2. Update placeholder API keys with real values
+3. Verify database migration succeeds
+
+---
+
+### Next Steps (Manual)
+
+1. **Create Shopify App** in Partner Dashboard
+   - Get real SHOPIFY_API_KEY and SHOPIFY_API_SECRET
+   - Update in Railway variables
+   - Configure OAuth redirect: `https://reviewboost-web-production.up.railway.app/auth/callback`
+
+2. **Get External API Keys**
+   - Anthropic: Update ANTHROPIC_API_KEY in Railway
+
+3. **Debug Runtime Issue**
+   - Check Railway logs for crash reason
+   - Fix any configuration issues
+
+---
+
+### Blockers
+
+- [ ] Real Shopify API credentials needed
+- [ ] Real Anthropic API key needed
+- [ ] Need to check Railway logs for crash reason
+
+---
+
 **Last Updated:** 2026-01-07
-**Status:** Phase 3 READY FOR DEPLOYMENT - All code complete, manual steps required
+**Status:** Phase 3 IN PROGRESS - Railway infrastructure ready, needs API keys and runtime debugging
