@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Shop - main entity for installed stores
+model Shop {
+  id              String         @id @default(cuid())
+  domain          String         @unique
+  accessToken     String
+  scope           String
+  isActive        Boolean        @default(true)
+
+  // Subscription
+  plan            String         @default("free")
+  responsesLimit  Int            @default(10)
+  responsesUsed   Int            @default(0)
+  billingCycleStart DateTime?
+
+  // Brand voice settings
+  brandVoice      String?        @default("professional")
+  customInstructions String?
+
+  // Contact
+  email           String?
+
+  // Timestamps
+  installedAt     DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  lastSyncAt      DateTime?
+
+  // Relations
+  reviews         Review[]
+  subscriptions   Subscription[]
+  responseTemplates ResponseTemplate[]
+
+  @@index([domain])
+  @@index([plan])
+}
+
+// Subscription - billing tracking
+model Subscription {
+  id              String    @id @default(cuid())
+  shopId          String
+  plan            String
+  status          String    // active, cancelled, pending
+  billingOn       DateTime?
+  trialEndsOn     DateTime?
+  shopifyChargeId String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([status])
+}
+
+// Review - synced from Shopify
+model Review {
+  id              String    @id @default(cuid())
+  shopId          String
+
+  // Shopify review data
+  shopifyReviewId String?   @unique
+  productId       String
+  productTitle    String
+  productHandle   String?
+
+  // Review content
+  rating          Int       // 1-5
+  title           String?
+  body            String
+  reviewerName    String
+  reviewerEmail   String?
+
+  // Sentiment (calculated)
+  sentiment       String    @default("neutral") // positive, neutral, negative
+
+  // Response
+  responseStatus  String    @default("pending") // pending, generated, edited, published, skipped
+  generatedResponse String?
+  editedResponse  String?
+  publishedResponse String?
+  publishedAt     DateTime?
+
+  // Timestamps
+  reviewCreatedAt DateTime
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([productId])
+  @@index([responseStatus])
+  @@index([sentiment])
+  @@index([rating])
+}
+
+// ResponseTemplate - saved response templates
+model ResponseTemplate {
+  id              String    @id @default(cuid())
+  shopId          String
+  name            String
+  category        String    // positive, neutral, negative, all
+  content         String
+  isDefault       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  shop            Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([category])
+}
+
+// Shopify Session storage (required for OAuth)
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+
+  @@index([shop])
+}
