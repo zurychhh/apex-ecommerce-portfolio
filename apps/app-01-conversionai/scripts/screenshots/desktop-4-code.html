@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600, height=900">
+  <title>Desktop Screenshot 4 - Code Snippet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1600px;
+      height: 900px;
+      font-family: 'Inter', sans-serif;
+      background: #F6F6F7;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      height: 100%;
+    }
+    .sidebar {
+      width: 240px;
+      background: #1A1A1A;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
+    .sidebar-logo span { color: #95BF47; font-weight: 700; font-size: 18px; }
+    .sidebar-item { padding: 12px 20px; color: #999; font-size: 14px; display: flex; align-items: center; gap: 12px; }
+    .sidebar-item.active { background: #333; color: white; border-left: 3px solid #5C6AC4; }
+    .sidebar-icon { width: 20px; height: 20px; background: currentColor; border-radius: 4px; opacity: 0.5; }
+    .main {
+      flex: 1;
+      padding: 32px 48px;
+      overflow: hidden;
+    }
+    .breadcrumb { font-size: 14px; color: #6B7280; margin-bottom: 16px; }
+    .breadcrumb a { color: #2563EB; text-decoration: none; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .header h1 { font-size: 24px; font-weight: 700; color: #1F2937; }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary { background: #2563EB; color: white; }
+    .code-container {
+      background: #1E1E1E;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .code-header {
+      background: #2D2D2D;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .code-tab {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #9CA3AF;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .code-tab.active {
+      background: #1E1E1E;
+      color: white;
+    }
+    .code-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .code-btn {
+      padding: 6px 12px;
+      background: #3B3B3B;
+      border: none;
+      border-radius: 6px;
+      color: #9CA3AF;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .code-btn:hover { background: #4B4B4B; color: white; }
+    .code-content {
+      padding: 24px;
+      overflow-x: auto;
+    }
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #D4D4D4;
+    }
+    .comment { color: #6A9955; }
+    .tag { color: #569CD6; }
+    .attr { color: #9CDCFE; }
+    .string { color: #CE9178; }
+    .keyword { color: #C586C0; }
+    .property { color: #9CDCFE; }
+    .value { color: #B5CEA8; }
+    .info-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      background: #EEF2FF;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .info-label { font-size: 12px; color: #6B7280; }
+    .info-value { font-size: 15px; font-weight: 600; color: #1F2937; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-logo"><span>shopify</span></div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Home</div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Orders</div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Products</div>
+      <div class="sidebar-item active"><div class="sidebar-icon"></div>ConversionAI</div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Analytics</div>
+    </div>
+    <div class="main">
+      <div class="breadcrumb">
+        <a href="#">Dashboard</a> / <a href="#">Recommendations</a> / <a href="#">Trust Badges</a> / Code
+      </div>
+      <div class="header">
+        <h1>Implementation Code</h1>
+        <button class="btn btn-primary">Copy All Code</button>
+      </div>
+
+      <div class="code-container">
+        <div class="code-header">
+          <div class="code-tabs">
+            <button class="code-tab active">product.liquid</button>
+            <button class="code-tab">styles.css</button>
+          </div>
+          <div class="code-actions">
+            <button class="code-btn">📋 Copy</button>
+            <button class="code-btn">⬇ Download</button>
+          </div>
+        </div>
+        <div class="code-content">
+<pre><span class="comment">&lt;!-- Trust Badges Section - Add below Add to Cart button --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"trust-badges"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"trust-badge"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg</span> <span class="attr">viewBox</span>=<span class="string">"0 0 24 24"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;path</span> <span class="attr">d</span>=<span class="string">"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"</span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/svg&gt;</span>
+    <span class="tag">&lt;span&gt;</span>Secure Checkout<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"trust-badge"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg</span> <span class="attr">viewBox</span>=<span class="string">"0 0 24 24"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;path</span> <span class="attr">d</span>=<span class="string">"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"</span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/svg&gt;</span>
+    <span class="tag">&lt;span&gt;</span>Money-Back Guarantee<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"trust-badge"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;svg</span> <span class="attr">viewBox</span>=<span class="string">"0 0 24 24"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;path</span> <span class="attr">d</span>=<span class="string">"M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10..."</span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;/svg&gt;</span>
+    <span class="tag">&lt;span&gt;</span>Free Shipping<span class="tag">&lt;/span&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div class="info-item">
+          <div class="info-icon">📄</div>
+          <div>
+            <div class="info-label">File Location</div>
+            <div class="info-value">sections/product.liquid</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">📍</div>
+          <div>
+            <div class="info-label">Insert After</div>
+            <div class="info-value">Add to Cart Button</div>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">⏱</div>
+          <div>
+            <div class="info-label">Implementation Time</div>
+            <div class="info-value">~10 minutes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

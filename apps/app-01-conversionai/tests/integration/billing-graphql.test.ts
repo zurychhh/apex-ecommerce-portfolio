@@ -100,31 +100,10 @@ describe('Shopify GraphQL Billing Integration', () => {
       expect(callArgs[1].variables.lineItems[0].plan.appRecurringPricingDetails.price.amount).toBe(PLANS.pro.price);
     });
 
-    it('should create enterprise subscription with 14-day trial', async () => {
-      const mockResponse = {
-        json: {
-          data: {
-            appSubscriptionCreate: {
-              appSubscription: {
-                id: 'gid://shopify/AppSubscription/789',
-                status: 'PENDING',
-                name: 'ConversionAI Enterprise',
-                trialDays: 14,
-              },
-              confirmationUrl: 'https://test-store.myshopify.com/admin/charges/confirm',
-              userErrors: [],
-            },
-          },
-        },
-      };
-
-      mockAdmin.graphql.mockResolvedValue(mockResponse);
-
-      await createSubscription(mockAdmin, mockShop, 'enterprise');
-
-      const callArgs = mockAdmin.graphql.mock.calls[0];
-      expect(callArgs[1].variables.trialDays).toBe(14);
-      expect(callArgs[1].variables.lineItems[0].plan.appRecurringPricingDetails.price.amount).toBe(199);
+    it('should reject enterprise plan (no longer supported)', async () => {
+      await expect(async () => {
+        await createSubscription(mockAdmin, mockShop, 'enterprise' as any);
+      }).rejects.toThrow('Invalid plan: enterprise');
     });
 
     it('should use custom returnUrl when provided', async () => {

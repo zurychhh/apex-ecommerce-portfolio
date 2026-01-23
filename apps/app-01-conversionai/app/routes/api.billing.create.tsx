@@ -19,9 +19,9 @@ export async function action({ request }: ActionFunctionArgs) {
     const plan = formData.get('plan') as string;
 
     // Validate plan
-    if (!plan || !['basic', 'pro', 'enterprise'].includes(plan)) {
+    if (!plan || !['basic', 'pro'].includes(plan)) {
       return json(
-        { error: 'Invalid plan. Choose basic, pro, or enterprise.' },
+        { error: 'Invalid plan. Choose basic or pro.' },
         { status: 400 }
       );
     }
@@ -32,7 +32,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const result = await createSubscription(
       admin,
       session.shop,
-      plan as 'basic' | 'pro' | 'enterprise'
+      plan as 'basic' | 'pro'
     );
 
     if (!result.confirmationUrl) {

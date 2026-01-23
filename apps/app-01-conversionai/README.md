@@ -9,8 +9,22 @@ ConversionAI is an AI-powered CRO consultant that analyzes Shopify stores and pr
 - **Goal**: Help Shopify merchants increase conversion rates without expensive agencies
 - **Tech Stack**: Remix + Shopify App Remix + Railway + Claude API + Playwright + Resend
 - **Timeline**: 3-week MVP
-- **Status**: 🟢 MVP Feature Complete (95%) - Ready for E2E Testing
+- **Status**: ✅ READY FOR SHOPIFY RE-SUBMISSION (Post-Billing Audit)
 - **Production URL**: `https://conversionai-web-production.up.railway.app`
+
+### 🚨 RECENT CRITICAL UPDATES (2026-01-23)
+
+**Shopify Compliance Fixes Applied:**
+- ❌ **Removed manual URL input** during installation (Shopify requirement)
+- ✅ **Fixed billing return URL** to stay within admin frame
+- ✅ **Implemented subscription sync** - UI reflects active plan immediately
+- ✅ **Honest billing structure** - removed fake features that didn't exist
+
+**Billing Structure Audit:**
+- **BEFORE**: 4 plans with false advertising (AI Chat, Budget Optimizer that didn't exist)
+- **AFTER**: 3 honest plans (Free, Basic $29, Pro $79 unlimited analyses)
+- **Enterprise plan removed** - existing customers mapped to Pro automatically
+- **All 26 unit tests passing** after restructure
 
 ## Features
 
@@ -20,7 +34,7 @@ ConversionAI is an AI-powered CRO consultant that analyzes Shopify stores and pr
 - ✅ AI-generated recommendations (10-15 per analysis)
 - ✅ Prioritization by impact & effort
 - ✅ Code snippets for implementation
-- ✅ Freemium billing (Free, Basic, Pro, Enterprise)
+- ✅ Freemium billing (Free, Basic, Pro)
 - ✅ Email notifications
 
 ### Future Phases
@@ -135,7 +149,7 @@ apps/app-01-conversionai/
 
 **Subscription**
 - Shopify billing integration
-- Plans: free, basic, pro, enterprise
+- Plans: free, basic, pro
 
 ## Development Commands
 
@@ -234,7 +248,7 @@ git push origin main
 
 ## Cron Job Configuration
 
-The app includes a weekly auto-refresh feature for Pro and Enterprise plans.
+The app includes a weekly auto-refresh feature for Pro plan subscribers.
 
 ### 1. Add CRON_SECRET to Railway
 
@@ -298,7 +312,7 @@ curl -X POST \
 ### How It Works
 
 - Runs every Monday at 9 AM UTC
-- Finds Pro/Enterprise shops with `lastAnalysis` > 7 days ago
+- Finds Pro plan shops with `lastAnalysis` > 7 days ago
 - Clears old recommendations
 - Queues new analysis jobs
 - Sends email notifications when complete
@@ -314,8 +328,8 @@ curl -X POST \
 - Verify database connection
 
 **If no shops queued:**
-- Expected if no Pro/Enterprise users with old analyses
-- Check database: `SELECT * FROM "Shop" WHERE plan IN ('pro', 'enterprise');`
+- Expected if no Pro plan users with old analyses
+- Check database: `SELECT * FROM "Shop" WHERE plan = 'pro';`
 
 ## Cost Breakdown
 

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600, height=900">
+  <title>Mobile Screenshot 1 - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1600px;
+      height: 900px;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .phone-frame {
+      width: 380px;
+      height: 780px;
+      background: #1A1A1A;
+      border-radius: 50px;
+      padding: 12px;
+      box-shadow: 0 50px 100px -20px rgba(0,0,0,0.4);
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: #F6F6F7;
+      border-radius: 40px;
+      overflow: hidden;
+    }
+    .status-bar {
+      height: 44px;
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .status-time { color: #1F2937; }
+    .status-icons { display: flex; gap: 6px; }
+    .status-icon { width: 18px; height: 12px; background: #1F2937; border-radius: 2px; }
+    .app-header {
+      background: white;
+      padding: 16px 20px;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .app-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1F2937;
+    }
+    .app-content {
+      padding: 20px;
+      height: calc(100% - 44px - 60px);
+      overflow-y: auto;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label { font-size: 13px; color: #6B7280; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #1F2937; }
+    .stat-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+      background: #DCFCE7;
+      color: #166534;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1F2937;
+      margin: 20px 0 12px;
+    }
+    .rec-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .rec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .rec-title { font-size: 14px; font-weight: 600; color: #1F2937; flex: 1; padding-right: 8px; }
+    .rec-impact {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      background: #DCFCE7;
+      color: #166534;
+      white-space: nowrap;
+    }
+    .rec-category { font-size: 12px; color: #6B7280; }
+    .btn-analyze {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 16px;
+    }
+    .label-text {
+      position: absolute;
+      right: 80px;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: right;
+    }
+    .label-text h2 {
+      font-size: 42px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .label-text p {
+      font-size: 18px;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="label-text">
+    <h2>Your AI CRO<br>Dashboard</h2>
+    <p>View all recommendations<br>and track progress</p>
+  </div>
+  <div class="phone-frame">
+    <div class="phone-screen">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <div class="status-icon"></div>
+          <div class="status-icon"></div>
+          <div class="status-icon"></div>
+        </div>
+      </div>
+      <div class="app-header">
+        <h1>ConversionAI</h1>
+      </div>
+      <div class="app-content">
+        <div class="stat-card">
+          <div class="stat-label">Total Recommendations</div>
+          <div class="stat-value">12</div>
+          <div class="stat-badge">Active</div>
+        </div>
+
+        <button class="btn-analyze">Run New Analysis</button>
+
+        <div class="section-title">Top Recommendations</div>
+
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Add Trust Badges</div>
+            <div class="rec-impact">High Impact</div>
+          </div>
+          <div class="rec-category">Trust & Credibility</div>
+        </div>
+
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Optimize Mobile Checkout</div>
+            <div class="rec-impact">High Impact</div>
+          </div>
+          <div class="rec-category">User Experience</div>
+        </div>
+
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Improve Product Images</div>
+            <div class="rec-impact">Medium</div>
+          </div>
+          <div class="rec-category">Visual Design</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

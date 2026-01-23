@@ -53,17 +53,9 @@ export default function UpgradePage() {
   const formatFeature = (key: string, value: any): string => {
     switch (key) {
       case 'analysisPerMonth':
-        return value >= 999 ? 'Unlimited analyses/month' : `${value} analyses/month`;
+        return value >= 999 ? 'Unlimited AI analyses/month' : `${value} AI analyses/month`;
       case 'recommendations':
-        return value >= 999 ? 'Unlimited recommendations' : `Up to ${value} recommendations`;
-      case 'emailNotifications':
-        return value ? 'Email notifications' : null;
-      case 'weeklyRefresh':
-        return value ? 'Weekly auto-refresh' : null;
-      case 'prioritySupport':
-        return value ? 'Priority support' : null;
-      case 'competitorTracking':
-        return value ? `Track ${value >= 999 ? 'unlimited' : value} competitors` : null;
+        return `Up to ${value} recommendations`;
       default:
         return null;
     }

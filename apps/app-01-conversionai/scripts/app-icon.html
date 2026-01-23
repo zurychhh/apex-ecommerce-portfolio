@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200, height=1200">
+  <title>ConversionAI App Icon</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1200px;
+      height: 1200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+      overflow: hidden;
+    }
+
+    .icon-container {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* The C shape */
+    .c-shape {
+      width: 500px;
+      height: 500px;
+      border: 60px solid white;
+      border-radius: 50%;
+      border-right-color: transparent;
+      position: relative;
+      transform: rotate(-45deg);
+    }
+
+    /* Crosshair center dot */
+    .center-dot {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Crosshair lines */
+    .crosshair-h {
+      position: absolute;
+      width: 180px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .crosshair-v {
+      position: absolute;
+      width: 12px;
+      height: 180px;
+      background: rgba(255, 255, 255, 0.5);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="icon-container">
+    <div class="c-shape"></div>
+    <div class="crosshair-h"></div>
+    <div class="crosshair-v"></div>
+    <div class="center-dot"></div>
+  </div>
+</body>
+</html>

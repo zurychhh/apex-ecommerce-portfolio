@@ -8,10 +8,6 @@ import { logger } from './logger.server';
 export interface PlanFeatures {
   analysisPerMonth: number;
   recommendations: number;
-  emailNotifications: boolean;
-  weeklyRefresh: boolean;
-  prioritySupport?: boolean;
-  competitorTracking?: number;
 }
 
 export interface Plan {
@@ -28,9 +24,7 @@ export const PLANS: Record<string, Plan> = {
     trialDays: 0,
     features: {
       analysisPerMonth: 1,
-      recommendations: 10,
-      emailNotifications: false,
-      weeklyRefresh: false,
+      recommendations: 5,
     },
   },
   basic: {
@@ -39,10 +33,7 @@ export const PLANS: Record<string, Plan> = {
     trialDays: 7,
     features: {
       analysisPerMonth: 4,
-      recommendations: 20,
-      emailNotifications: true,
-      weeklyRefresh: false,
-      competitorTracking: 3,
+      recommendations: 15,
     },
   },
   pro: {
@@ -50,25 +41,8 @@ export const PLANS: Record<string, Plan> = {
     price: 79,
     trialDays: 7,
     features: {
-      analysisPerMonth: 12,
-      recommendations: 50,
-      emailNotifications: true,
-      weeklyRefresh: true,
-      prioritySupport: true,
-      competitorTracking: 10,
-    },
-  },
-  enterprise: {
-    name: 'Enterprise',
-    price: 199,
-    trialDays: 14,
-    features: {
       analysisPerMonth: 999, // Unlimited
-      recommendations: 999,
-      emailNotifications: true,
-      weeklyRefresh: true,
-      prioritySupport: true,
-      competitorTracking: 999,
+      recommendations: 50,
     },
   },
 };
@@ -79,8 +53,8 @@ export const PLANS: Record<string, Plan> = {
 export async function createSubscription(
   admin: any,
   shop: string,
-  plan: 'basic' | 'pro' | 'enterprise',
-  returnUrl?: string
+  plan: 'basic' | 'pro',
+  appHandle?: string
 ) {
   const planConfig = PLANS[plan];
 
@@ -88,7 +62,16 @@ export async function createSubscription(
     throw new Error(`Invalid plan: ${plan}`);
   }
 
-  const defaultReturnUrl = `https://${shop}/admin/apps/conversionai`;
+  // Check if appHandle is a full URL or just a handle
+  let returnUrl: string;
+  if (appHandle && appHandle.startsWith('http')) {
+    // Full URL provided (for testing or custom deployments)
+    returnUrl = appHandle;
+  } else {
+    // App handle provided - construct standard admin URL
+    const handle = appHandle || process.env.SHOPIFY_APP_HANDLE || 'conversionai';
+    returnUrl = `https://${shop}/admin/apps/${handle}`;
+  }
 
   try {
     const response = await admin.graphql(
@@ -118,7 +101,7 @@ export async function createSubscription(
       {
         variables: {
           name: `ConversionAI ${planConfig.name}`,
-          returnUrl: returnUrl || defaultReturnUrl,
+          returnUrl: returnUrl,
           trialDays: planConfig.trialDays,
           lineItems: [
             {
@@ -235,7 +218,8 @@ export async function cancelSubscription(admin: any, subscriptionId: string) {
 export function getPlanFromSubscription(subscriptionName: string): string {
   const lowerName = subscriptionName.toLowerCase();
 
-  if (lowerName.includes('enterprise')) return 'enterprise';
+  // Enterprise no longer exists, map to pro for existing customers
+  if (lowerName.includes('enterprise')) return 'pro';
   if (lowerName.includes('pro')) return 'pro';
   if (lowerName.includes('basic')) return 'basic';
 
@@ -277,7 +261,7 @@ export function comparePlans(
   currentPlan: string,
   targetPlan: string
 ): 'upgrade' | 'downgrade' | 'same' {
-  const planOrder = ['free', 'basic', 'pro', 'enterprise'];
+  const planOrder = ['free', 'basic', 'pro'];
   const currentIndex = planOrder.indexOf(currentPlan);
   const targetIndex = planOrder.indexOf(targetPlan);
 

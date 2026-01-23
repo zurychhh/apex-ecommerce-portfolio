@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600, height=900">
+  <title>Desktop Screenshot 2 - AI Analysis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1600px;
+      height: 900px;
+      font-family: 'Inter', sans-serif;
+      background: #F6F6F7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .analysis-card {
+      background: white;
+      border-radius: 20px;
+      padding: 60px 80px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+      text-align: center;
+      max-width: 800px;
+    }
+    .icon-container {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+      border-radius: 30px;
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .icon-container svg {
+      width: 60px;
+      height: 60px;
+      fill: white;
+    }
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 16px;
+    }
+    .subtitle {
+      font-size: 18px;
+      color: #6B7280;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    .progress-container {
+      background: #F3F4F6;
+      border-radius: 12px;
+      height: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+      border-radius: 12px;
+      width: 65%;
+      animation: progress 2s ease-in-out infinite;
+    }
+    @keyframes progress {
+      0% { width: 45%; }
+      50% { width: 75%; }
+      100% { width: 45%; }
+    }
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 32px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .step-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .step-icon.done {
+      background: #DCFCE7;
+      color: #166534;
+    }
+    .step-icon.active {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+    .step-icon.pending {
+      background: #F3F4F6;
+      color: #9CA3AF;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="analysis-card">
+    <div class="icon-container">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    <h1>AI Analysis in Progress</h1>
+    <p class="subtitle">
+      Claude AI is analyzing your store's design, user experience,<br>
+      and conversion opportunities
+    </p>
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon done">✓</div>
+        <span class="step-text">Screenshots captured</span>
+      </div>
+      <div class="step">
+        <div class="step-icon active">●</div>
+        <span class="step-text">Vision analysis</span>
+      </div>
+      <div class="step">
+        <div class="step-icon pending">○</div>
+        <span class="step-text">Generating recommendations</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

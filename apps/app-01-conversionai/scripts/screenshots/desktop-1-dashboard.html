@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600, height=900">
+  <title>Desktop Screenshot 1 - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1600px;
+      height: 900px;
+      font-family: 'Inter', sans-serif;
+      background: #F6F6F7;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      height: 100%;
+    }
+    /* Shopify-style sidebar */
+    .sidebar {
+      width: 240px;
+      background: #1A1A1A;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 20px;
+    }
+    .sidebar-logo span {
+      color: #95BF47;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .sidebar-item {
+      padding: 12px 20px;
+      color: #999;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-item.active {
+      background: #333;
+      color: white;
+      border-left: 3px solid #5C6AC4;
+    }
+    .sidebar-icon {
+      width: 20px;
+      height: 20px;
+      background: currentColor;
+      border-radius: 4px;
+      opacity: 0.5;
+    }
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 32px 48px;
+      overflow: hidden;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1F2937;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #2563EB;
+      color: white;
+    }
+    .btn-secondary {
+      background: white;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+    /* Stats cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1F2937;
+    }
+    .stat-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .stat-badge.green { background: #DCFCE7; color: #166534; }
+    .stat-badge.blue { background: #DBEAFE; color: #1E40AF; }
+    /* Recommendations section */
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 16px;
+    }
+    .recommendations {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .rec-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .rec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .rec-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1F2937;
+      flex: 1;
+      padding-right: 12px;
+    }
+    .rec-impact {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .rec-impact.high { background: #DCFCE7; color: #166534; }
+    .rec-impact.medium { background: #FEF3C7; color: #92400E; }
+    .rec-category {
+      font-size: 12px;
+      color: #6B7280;
+      margin-bottom: 12px;
+    }
+    .rec-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .rec-meta {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+    .rec-btn {
+      padding: 6px 16px;
+      background: #F3F4F6;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <span>shopify</span>
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-icon"></div>
+        Home
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-icon"></div>
+        Orders
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-icon"></div>
+        Products
+      </div>
+      <div class="sidebar-item active">
+        <div class="sidebar-icon"></div>
+        ConversionAI
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-icon"></div>
+        Analytics
+      </div>
+    </div>
+    <div class="main">
+      <div class="header">
+        <h1>ConversionAI Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn btn-secondary">Settings</button>
+          <button class="btn btn-primary">Run New Analysis</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Recommendations</div>
+          <div class="stat-value">12</div>
+          <div class="stat-badge green">Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Implemented</div>
+          <div class="stat-value">4</div>
+          <div class="stat-badge blue">In Progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Categories Analyzed</div>
+          <div class="stat-value">6</div>
+          <div class="stat-badge green">Complete</div>
+        </div>
+      </div>
+
+      <div class="section-title">Top Recommendations</div>
+      <div class="recommendations">
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Add Trust Badges to Product Pages</div>
+            <div class="rec-impact high">High Impact</div>
+          </div>
+          <div class="rec-category">Category: Trust & Credibility</div>
+          <div class="rec-footer">
+            <div class="rec-meta">Effort: Low</div>
+            <button class="rec-btn">View Details</button>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Optimize Mobile Checkout Flow</div>
+            <div class="rec-impact high">High Impact</div>
+          </div>
+          <div class="rec-category">Category: User Experience</div>
+          <div class="rec-footer">
+            <div class="rec-meta">Effort: Medium</div>
+            <button class="rec-btn">View Details</button>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Improve Product Image Quality</div>
+            <div class="rec-impact medium">Medium Impact</div>
+          </div>
+          <div class="rec-category">Category: Visual Design</div>
+          <div class="rec-footer">
+            <div class="rec-meta">Effort: Low</div>
+            <button class="rec-btn">View Details</button>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Add Urgency Elements to Cart</div>
+            <div class="rec-impact medium">Medium Impact</div>
+          </div>
+          <div class="rec-category">Category: Conversion</div>
+          <div class="rec-footer">
+            <div class="rec-meta">Effort: Low</div>
+            <button class="rec-btn">View Details</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

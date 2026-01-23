@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600, height=900">
+  <title>Desktop Screenshot 3 - Recommendation Detail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1600px;
+      height: 900px;
+      font-family: 'Inter', sans-serif;
+      background: #F6F6F7;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+      height: 100%;
+    }
+    .sidebar {
+      width: 240px;
+      background: #1A1A1A;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 20px;
+    }
+    .sidebar-logo span { color: #95BF47; font-weight: 700; font-size: 18px; }
+    .sidebar-item {
+      padding: 12px 20px;
+      color: #999;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-item.active { background: #333; color: white; border-left: 3px solid #5C6AC4; }
+    .sidebar-icon { width: 20px; height: 20px; background: currentColor; border-radius: 4px; opacity: 0.5; }
+    .main {
+      flex: 1;
+      padding: 32px 48px;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 16px;
+    }
+    .breadcrumb a { color: #2563EB; text-decoration: none; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 8px;
+    }
+    .header-meta {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge.high { background: #DCFCE7; color: #166534; }
+    .badge.category { background: #EEF2FF; color: #4338CA; }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary { background: #2563EB; color: white; }
+    .btn-secondary { background: white; color: #374151; border: 1px solid #D1D5DB; }
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+    }
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title-icon {
+      width: 24px;
+      height: 24px;
+      background: #EEF2FF;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .description {
+      font-size: 15px;
+      color: #4B5563;
+      line-height: 1.7;
+    }
+    .implementation-steps {
+      list-style: none;
+    }
+    .implementation-steps li {
+      padding: 12px 0;
+      border-bottom: 1px solid #F3F4F6;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .implementation-steps li:last-child { border-bottom: none; }
+    .step-number {
+      width: 24px;
+      height: 24px;
+      background: #2563EB;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.5;
+    }
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .metrics-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .metrics-title {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 12px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .metric {
+      text-align: center;
+      padding: 16px;
+      background: #F9FAFB;
+      border-radius: 8px;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1F2937;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #6B7280;
+      margin-top: 4px;
+    }
+    .metric-value.high { color: #059669; }
+    .actions-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .action-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .action-btn:last-child { margin-bottom: 0; }
+    .action-btn.primary { background: #059669; color: white; }
+    .action-btn.secondary { background: #F3F4F6; color: #374151; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-logo"><span>shopify</span></div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Home</div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Orders</div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Products</div>
+      <div class="sidebar-item active"><div class="sidebar-icon"></div>ConversionAI</div>
+      <div class="sidebar-item"><div class="sidebar-icon"></div>Analytics</div>
+    </div>
+    <div class="main">
+      <div class="breadcrumb">
+        <a href="#">Dashboard</a> / <a href="#">Recommendations</a> / Trust Badges
+      </div>
+      <div class="header">
+        <div>
+          <h1>Add Trust Badges to Product Pages</h1>
+          <div class="header-meta">
+            <span class="badge high">High Impact</span>
+            <span class="badge category">Trust & Credibility</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-secondary">Skip</button>
+          <button class="btn btn-primary">Mark as Implemented</button>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="main-content">
+          <div class="card">
+            <div class="card-title">
+              <div class="card-title-icon">🔍</div>
+              Problem Identified
+            </div>
+            <p class="description">
+              Your product pages lack visible trust indicators. Shoppers need reassurance before making a purchase, especially from stores they're visiting for the first time. Trust badges showing secure payment, money-back guarantees, and shipping information can significantly improve buyer confidence.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <div class="card-title-icon">📋</div>
+              Implementation Steps
+            </div>
+            <ul class="implementation-steps">
+              <li>
+                <span class="step-number">1</span>
+                <span class="step-text">Add security badge SVGs to your theme assets folder</span>
+              </li>
+              <li>
+                <span class="step-number">2</span>
+                <span class="step-text">Insert the trust badges section in product.liquid template below the Add to Cart button</span>
+              </li>
+              <li>
+                <span class="step-number">3</span>
+                <span class="step-text">Add CSS styling for responsive display on mobile devices</span>
+              </li>
+              <li>
+                <span class="step-number">4</span>
+                <span class="step-text">Test on multiple devices to ensure proper alignment</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sidebar-panel">
+          <div class="metrics-card">
+            <div class="metrics-title">Impact Assessment</div>
+            <div class="metrics-grid">
+              <div class="metric">
+                <div class="metric-value high">High</div>
+                <div class="metric-label">Impact Score</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">Low</div>
+                <div class="metric-label">Effort Required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-card">
+            <button class="action-btn primary">✓ Mark as Implemented</button>
+            <button class="action-btn secondary">View Code Snippet</button>
+            <button class="action-btn secondary">Skip This Recommendation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -18,18 +18,24 @@ import { BrandedFooter } from "../components/BrandedFooter";
 import { useEffect, useState } from "react";
 import { authenticate } from "../shopify.server";
 import { prisma } from "../utils/db.server";
-import { PLANS, canPerformAnalysis } from "../utils/billing.server";
+import { PLANS, canPerformAnalysis, checkActiveSubscription, getPlanFromSubscription } from "../utils/billing.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
   const url = new URL(request.url);
   const analyzingParam = url.searchParams.get("analyzing") === "true";
   const upgraded = url.searchParams.get("upgraded") === "true";
   const upgradeCancelled = url.searchParams.get("upgrade_cancelled") === "true";
   const billingError = url.searchParams.get("billing_error") === "true";
 
+  // SYNC: Check active subscriptions and sync with database
+  const subscriptions = await checkActiveSubscription(admin);
+  const activeSubscription = subscriptions.find(
+    (sub: any) => sub.status === 'ACTIVE'
+  );
+
   // Get shop data from our database
-  const shop = await prisma.shop.findUnique({
+  let shop = await prisma.shop.findUnique({
     where: { domain: session.shop },
     include: {
       recommendations: {
@@ -42,6 +48,31 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
     },
   });
+
+  // SYNC: If we have an active subscription but DB shows different plan - synchronize
+  if (activeSubscription && shop) {
+    const planFromSub = getPlanFromSubscription(activeSubscription.name);
+    if (shop.plan !== planFromSub) {
+      await prisma.shop.update({
+        where: { domain: session.shop },
+        data: { plan: planFromSub },
+      });
+      // Refresh shop data
+      shop = await prisma.shop.findUnique({
+        where: { domain: session.shop },
+        include: {
+          recommendations: {
+            orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+            take: 5,
+          },
+          metrics: {
+            orderBy: { recordedAt: "desc" },
+            take: 1,
+          },
+        },
+      });
+    }
+  }
 
   // Count recommendations by status
   const recommendationCounts = shop?.id

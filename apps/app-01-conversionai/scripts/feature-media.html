@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1600, height=900">
+  <title>ConversionAI Feature Media</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 1600px;
+      height: 900px;
+      background: #F6F6F7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      padding: 60px;
+      gap: 60px;
+    }
+
+    /* LEFT SIDE - Dashboard Mockup */
+    .left-side {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .dashboard-mockup {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      padding: 24px;
+      transform: perspective(1000px) rotateY(5deg);
+    }
+
+    .mockup-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .mockup-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .mockup-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1F2937;
+    }
+
+    .recommendations-label {
+      font-size: 13px;
+      color: #6B7280;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .rec-card {
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .rec-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .rec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .rec-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1F2937;
+      flex: 1;
+    }
+
+    .rec-badge {
+      background: #DCFCE7;
+      color: #166534;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .rec-badge.medium {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .rec-badge.low {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .rec-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #6B7280;
+    }
+
+    .rec-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* RIGHT SIDE - Value Proposition */
+    .right-side {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-left: 20px;
+    }
+
+    .headline {
+      font-size: 52px;
+      font-weight: 800;
+      color: #1F2937;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .headline .highlight {
+      background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subheadline {
+      font-size: 20px;
+      color: #6B7280;
+      margin-bottom: 48px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .benefit-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .benefit-card.primary {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: white;
+      text-align: center;
+      padding: 36px;
+    }
+
+    .benefit-card.primary .benefit-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: white;
+    }
+
+    .benefit-card.primary .benefit-desc {
+      font-size: 16px;
+      opacity: 0.9;
+      color: white;
+    }
+
+    .benefit-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .benefit-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1F2937;
+      margin-bottom: 4px;
+    }
+
+    .benefit-desc {
+      font-size: 14px;
+      color: #6B7280;
+      font-weight: 500;
+    }
+
+    .features-row {
+      display: flex;
+      gap: 32px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      color: #4B5563;
+      font-weight: 500;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      background: #EEF2FF;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .feature-icon.green {
+      background: #ECFDF5;
+    }
+
+    .feature-icon.orange {
+      background: #FFF7ED;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- LEFT SIDE - Dashboard Mockup -->
+    <div class="left-side">
+      <div class="dashboard-mockup">
+        <div class="mockup-header">
+          <div class="mockup-logo">C</div>
+          <div class="mockup-title">ConversionAI</div>
+        </div>
+
+        <div class="recommendations-label">AI RECOMMENDATIONS</div>
+
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Add Trust Badges to Product Pages</div>
+            <div class="rec-badge">High Impact</div>
+          </div>
+          <div class="rec-meta">
+            <span>Category: Trust</span>
+            <span>Effort: Low</span>
+          </div>
+        </div>
+
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Optimize Mobile Checkout Flow</div>
+            <div class="rec-badge medium">Medium</div>
+          </div>
+          <div class="rec-meta">
+            <span>Category: UX</span>
+            <span>Effort: Medium</span>
+          </div>
+        </div>
+
+        <div class="rec-card">
+          <div class="rec-header">
+            <div class="rec-title">Improve Product Image Quality</div>
+            <div class="rec-badge low">Quick Win</div>
+          </div>
+          <div class="rec-meta">
+            <span>Category: Visual</span>
+            <span>Effort: Low</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE - Value Proposition -->
+    <div class="right-side">
+      <h1 class="headline">
+        <span class="highlight">AI CRO Consultant</span><br>
+        in Your Pocket
+      </h1>
+      <p class="subheadline">Get personalized conversion optimization recommendations<br>powered by Claude AI vision analysis</p>
+
+      <div class="benefits-grid">
+        <div class="benefit-card primary">
+          <div class="benefit-title">Actionable Recommendations with Code</div>
+          <div class="benefit-desc">Each recommendation includes ready-to-implement code snippets and step-by-step guidance</div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">🎯</div>
+          <div class="benefit-title">Prioritized by Impact</div>
+          <div class="benefit-desc">Focus on what matters most</div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon">⚡</div>
+          <div class="benefit-title">Quick Implementation</div>
+          <div class="benefit-desc">Copy-paste code snippets</div>
+        </div>
+      </div>
+
+      <div class="features-row">
+        <div class="feature-item">
+          <div class="feature-icon">🔍</div>
+          <span>AI Vision Analysis</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon green">📋</div>
+          <span>Code Snippets</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon orange">🚀</div>
+          <span>Easy Setup</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
