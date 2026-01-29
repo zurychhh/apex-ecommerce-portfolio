@@ -1,12 +1,12 @@
 # APEX eCommerce Portfolio - Project Status
 
-**Last Updated**: 2026-01-29 (Session #23)
+**Last Updated**: 2026-01-29 (Session #24)
 
 ---
 
 ## Active App: ConversionAI (App #1)
 
-### 🔧 Overall Progress: 100% MVP COMPLETE + SHOPIFY REVIEW FIXES APPLIED
+### 🔧 Overall Progress: 100% MVP COMPLETE + BILLING FIXES VERIFIED
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -16,7 +16,7 @@
 | Week 4 - Testing & QA | ✅ Complete | 100% |
 
 **Testing Status**:
-- ✅ Unit Tests: 108/108 PASS (100%)
+- ✅ Unit Tests: 124/124 PASS (100%)
 - ✅ API Health Checks: 5/5 PASS (100%)
 - ✅ Browser E2E Tests: **7/7 PASS (100%)** - Session #15
 - ✅ Code Coverage: 83.2% statements, 84.2% branches, 80% functions
@@ -36,6 +36,31 @@
 | CAI-PERF-01: Performance | ✅ PASS | 12s |
 
 **Total**: 7/7 (100%) | **Performance Grade**: A | **Ready for Production**: YES
+
+---
+
+## ✅ RESOLVED: Billing API Not Working (Session #24)
+
+### Problem (Was)
+Billing upgrade flow returned HTTP 500. Two separate root causes:
+1. `response.json` was accessed as a property instead of calling it as an async method
+2. App was configured as "Managed Pricing" in Partner Dashboard, blocking the Billing API entirely
+
+### Fixes Applied
+| Issue | Root Cause | Fix |
+|-------|------------|-----|
+| 1. response.json parsing | `.json` is async method, not property | `await response.json()` |
+| 2. Managed Pricing blocking API | Partner Dashboard setting | Switched to Manual Pricing |
+| 3. Analysis count logic | `findFirst()` returns 0/1 only | Changed to `.count()` |
+| 4. Missing billing validation | No plan limits enforced | Added `canPerformAnalysis()` checks |
+| 5. Test mocks outdated | 15 mocks used property pattern | Updated to async method pattern |
+
+### Verification (Browser E2E)
+- ✅ Upgrade page shows 3 plans with correct pricing
+- ✅ "Start 7-Day Trial" creates subscription via Billing API (204 response)
+- ✅ Shopify confirmation page displays correctly ($29/month, 7-day trial)
+- ✅ Analysis limit enforced: "14 of 1 analyses used", button disabled
+- ✅ All 124 tests pass
 
 ---
 

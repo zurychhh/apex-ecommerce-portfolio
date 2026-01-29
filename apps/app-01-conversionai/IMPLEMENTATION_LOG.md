@@ -1,5 +1,150 @@
 # ConversionAI - Implementation Log
 
+## Session #24 - 2026-01-29 (BILLING FIXES & END-TO-END VERIFICATION)
+
+### Summary
+
+Fixed critical billing infrastructure bugs and verified the entire billing + analysis limit enforcement flow end-to-end in the browser.
+
+---
+
+### Bug Fix #1: `response.json` Parsing (Critical)
+
+**Problem**: `billing.server.ts` was using `response.json?.data?.appSubscriptionCreate` treating `.json` as a property. The Shopify Admin GraphQL client (`admin.graphql()`) returns a response where `.json()` is an **async method**, not a property. This caused all billing API calls to silently fail with undefined data.
+
+**Root cause**: Incorrect assumption about the Shopify SDK response shape.
+
+**Fix**: Changed all three billing functions to use `await response.json()`:
+
+**File**: `app/utils/billing.server.ts`
+```typescript
+// BEFORE (broken):
+const result = response.json?.data?.appSubscriptionCreate;
+
+// AFTER (correct):
+const responseJson = await response.json();
+const result = responseJson.data?.appSubscriptionCreate;
+```
+
+Applied to: `createSubscription()`, `checkActiveSubscription()`, `cancelSubscription()`
+
+---
+
+### Bug Fix #2: Monthly Analysis Count Logic
+
+**Problem**: `app/routes/app.analysis.start.tsx` was using `prisma.shopMetrics.findFirst()` which only returns 0 or 1, making the billing limit useless since it would never detect more than 1 analysis.
+
+**Fix**: Changed to `prisma.shopMetrics.count()` to get the actual count of analyses performed this month.
+
+**Files modified**:
+- `app/routes/app.analysis.start.tsx` - loader and action both use `.count()` now
+- `app/routes/api.analysis.start.tsx` - API route also uses `.count()`
+
+---
+
+### Bug Fix #3: Billing Validation Added to Analysis Routes
+
+**Problem**: Both analysis start routes (`app.analysis.start.tsx` and `api.analysis.start.tsx`) were missing billing validation - any user could run unlimited analyses regardless of plan.
+
+**Fix**: Added `canPerformAnalysis()` checks to both the loader (for UI display) and action (for enforcement) in both routes. The UI shows:
+- Warning banner with usage count (e.g., "14 of 1 analyses used")
+- "Upgrade Plan" link
+- Disabled "Limit Reached" button when limit exceeded
+
+---
+
+### Bug Fix #4: Test Mock Updates (15 mocks)
+
+**Problem**: All 15 test mocks in `billing-graphql.test.ts` used `json: { data: ... }` (property pattern) which didn't match the production code fix.
+
+**Fix**: Updated all mocks to use `json: async () => ({ data: ... })` (async method pattern).
+
+**File**: `tests/integration/billing-graphql.test.ts`
+```typescript
+// BEFORE:
+const mockResponse = { json: { data: { ... } } };
+
+// AFTER:
+const mockResponse = { json: async () => ({ data: { ... } }) };
+```
+
+**Result**: All 21 billing tests pass, all 124 project tests pass.
+
+---
+
+### Bug Fix #5: Managed Pricing → Manual Pricing (Partner Dashboard)
+
+**Problem**: After fixing the code, the billing API still returned HTTP 500 with error: `"Managed Pricing Apps cannot use the Billing API (to create charges)."` The app was configured as a "Managed Pricing" app in the Shopify Partner Dashboard, which completely blocks the `appSubscriptionCreate` GraphQL mutation.
+
+**Root cause**: The Partner Dashboard had "Managed pricing" selected (plans defined in dashboard, Shopify hosts pricing page) instead of "Manual pricing" (plans defined in code, app calls Billing API).
+
+**Fix**: Navigated to Partner Dashboard → Apps → conversionai → Distribution → Edit listing → Pricing details → Manage → Settings → switched from "Managed pricing" to **"Manual pricing"** and saved.
+
+**Note**: The Partner Dashboard had plans that didn't match the code:
+| Dashboard | Code |
+|-----------|------|
+| free (Free) | free ($0) |
+| pro ($29/month) | basic ($29) |
+| enterprise ($99/month) | pro ($79) |
+
+With Manual Pricing enabled, the code-defined plans are what matters, so this mismatch is no longer an issue.
+
+---
+
+### End-to-End Browser Verification
+
+Tested the full billing flow using Chrome DevTools MCP:
+
+1. **Upgrade page** (`/app/upgrade`): Shows 3 plans (Free, Basic $29/mo, Pro $79/mo) with trial buttons - ✅
+2. **Start 7-Day Trial click**: POST to `/api/billing/create` returned 204 (redirect) - ✅
+3. **Shopify confirmation page**: Shows "Zatwierdź subskrypcję" (Confirm subscription) with:
+   - Plan: ConversionAI Basic
+   - Price: $29.00 USD every 30 days
+   - 7-day free trial ending Feb 5
+   - Payment method selection (credit card / PayPal) - ✅
+4. **Analysis limit enforcement** (`/app/analysis/start`):
+   - Banner: "You've used 14 of 1 analyses this month"
+   - "Upgrade Plan" link visible
+   - Button disabled showing "Limit Reached" - ✅
+
+---
+
+### Deployment
+
+- Built successfully (`npm run build`)
+- All 124 tests pass
+- Committed and pushed to `main`
+- Deployed to Railway via GraphQL API
+- Health check confirmed (HTTP 200)
+
+---
+
+### Files Modified
+
+| File | Change | Status |
+|------|--------|--------|
+| `app/utils/billing.server.ts` | Fixed `response.json()` async parsing in all 3 functions | ✅ |
+| `app/routes/app.analysis.start.tsx` | Added billing validation + fixed count logic | ✅ |
+| `app/routes/api.analysis.start.tsx` | Added billing validation + fixed count logic | ✅ |
+| `tests/integration/billing-graphql.test.ts` | Updated 15 mocks to async `json()` pattern | ✅ |
+
+### External Changes (Partner Dashboard)
+
+| Change | Status |
+|--------|--------|
+| Switched from Managed Pricing to Manual Pricing | ✅ |
+
+---
+
+### Lessons Learned
+
+1. **Shopify `admin.graphql()` response**: `.json()` is an async method, NOT a property. Always use `const data = await response.json()`.
+2. **Managed vs Manual Pricing**: These are mutually exclusive. If "Managed Pricing" is enabled in Partner Dashboard, the Billing API (`appSubscriptionCreate`) is completely blocked. Must switch to "Manual pricing" to use code-defined plans.
+3. **Test mocks must match production**: When fixing SDK response patterns, update ALL test mocks to match.
+4. **`prisma.count()` vs `findFirst()`**: Use `.count()` when you need the actual number of records, not just existence.
+
+---
+
 ## Session #23 - 2026-01-23 (🚨 SHOPIFY REVIEW FEEDBACK - COMPLIANCE FIXES)
 
 ### ✅ ALL SHOPIFY REVIEW ISSUES RESOLVED
