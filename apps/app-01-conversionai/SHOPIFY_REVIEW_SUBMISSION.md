@@ -114,14 +114,15 @@ ConversionAI is an AI-powered conversion rate optimization (CRO) app for Shopify
 | Create Subscription | `api.billing.create.tsx` | ✅ |
 | Billing Callback | `api.billing.callback.tsx` | ✅ |
 
-### Pricing Tiers
+### Pricing Tiers (Updated 2026-01-23 - Compliance Fix)
 
 | Plan | Price | Trial | Features |
 |------|-------|-------|----------|
-| Free | $0/mo | - | 1 analysis/month, 10 recommendations |
-| Basic | $29/mo | 7 days | 4 analyses/month, 20 recommendations, email notifications |
-| Pro | $79/mo | 7 days | 12 analyses/month, 50 recommendations, weekly auto-refresh, priority support |
-| Enterprise | $199/mo | 14 days | Unlimited analyses, unlimited recommendations, API access |
+| Free | $0/mo | - | 1 analysis/month, 5 recommendations |
+| Basic | $29/mo | 7 days | 4 analyses/month, 15 recommendations |
+| Pro | $79/mo | 7 days | Unlimited analyses, 50 recommendations |
+
+**Note**: Enterprise plan removed during compliance audit (Session #23). Existing enterprise customers auto-mapped to Pro.
 
 **Pricing Page**: `/app/upgrade`
 
@@ -230,7 +231,7 @@ ConversionAI is an AI-powered conversion rate optimization (CRO) app for Shopify
 
 **Step 4: Billing Flow (2 min)**
 1. Navigate to "Upgrade Plan"
-2. Review four tiers: Free, Basic ($29), Pro ($79), Enterprise ($199)
+2. Review three tiers: Free, Basic ($29), Pro ($79)
 3. Click "Start 7-Day Trial" on Pro plan
 4. **Expected**: Redirect to Shopify billing confirmation
 5. Verify amount shows $79.00/month

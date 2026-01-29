@@ -41,7 +41,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should create basic subscription successfully', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCreate: {
               appSubscription: {
@@ -56,7 +56,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -71,7 +71,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should create pro subscription with correct pricing', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCreate: {
               appSubscription: {
@@ -85,7 +85,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -109,7 +109,7 @@ describe('Shopify GraphQL Billing Integration', () => {
     it('should use custom returnUrl when provided', async () => {
       const customReturnUrl = 'https://custom-url.com/callback';
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCreate: {
               appSubscription: { id: 'gid://shopify/AppSubscription/123' },
@@ -117,7 +117,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -130,7 +130,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should use default returnUrl when not provided', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCreate: {
               appSubscription: { id: 'gid://shopify/AppSubscription/123' },
@@ -138,7 +138,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -159,7 +159,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should throw error when Shopify returns userErrors', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCreate: {
               appSubscription: null,
@@ -169,7 +169,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               ],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -200,7 +200,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should log successful subscription creation', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCreate: {
               appSubscription: {
@@ -210,7 +210,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -241,13 +241,13 @@ describe('Shopify GraphQL Billing Integration', () => {
       ];
 
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             currentAppInstallation: {
               activeSubscriptions: mockSubscriptions,
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -261,13 +261,13 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should return empty array when no subscriptions', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             currentAppInstallation: {
               activeSubscriptions: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -279,13 +279,13 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should return empty array when activeSubscriptions is null', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             currentAppInstallation: {
               activeSubscriptions: null,
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -302,13 +302,13 @@ describe('Shopify GraphQL Billing Integration', () => {
       ];
 
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             currentAppInstallation: {
               activeSubscriptions: mockSubscriptions,
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -333,11 +333,11 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should handle missing currentAppInstallation', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             currentAppInstallation: null,
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -353,7 +353,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should cancel subscription successfully', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCancel: {
               appSubscription: {
@@ -363,7 +363,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -376,14 +376,14 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should pass correct subscription ID to GraphQL', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCancel: {
               appSubscription: { id: subscriptionId, status: 'CANCELLED' },
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -396,14 +396,14 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should log successful cancellation', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCancel: {
               appSubscription: { id: subscriptionId, status: 'CANCELLED' },
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -417,7 +417,7 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should throw error when Shopify returns userErrors', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCancel: {
               appSubscription: null,
@@ -426,7 +426,7 @@ describe('Shopify GraphQL Billing Integration', () => {
               ],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);
@@ -452,14 +452,14 @@ describe('Shopify GraphQL Billing Integration', () => {
 
     it('should handle empty userErrors array', async () => {
       const mockResponse = {
-        json: {
+        json: async () => ({
           data: {
             appSubscriptionCancel: {
               appSubscription: { id: subscriptionId, status: 'CANCELLED' },
               userErrors: [],
             },
           },
-        },
+        }),
       };
 
       mockAdmin.graphql.mockResolvedValue(mockResponse);

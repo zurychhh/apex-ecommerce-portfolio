@@ -7,6 +7,7 @@ import { authenticate } from '../shopify.server';
 import { prisma } from '../utils/db.server';
 import { queueAnalysis } from '../utils/queue.server';
 import { logger } from '../utils/logger.server';
+import { PLANS, canPerformAnalysis } from '../utils/billing.server';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -14,17 +15,45 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const shop = await prisma.shop.findUnique({
     where: { domain: session.shop },
     select: {
+      id: true,
       domain: true,
+      plan: true,
       primaryGoal: true,
       lastAnalysis: true,
     },
   });
+
+  // Check billing limits
+  const currentPlan = shop?.plan || 'free';
+  const planConfig = PLANS[currentPlan] || PLANS.free;
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const analysisCountThisMonth = shop?.id
+    ? await prisma.shopMetrics.count({
+        where: {
+          shopId: shop.id,
+          recordedAt: { gte: startOfMonth },
+        },
+      })
+    : 0;
+
+  const billingCheck = await canPerformAnalysis(currentPlan, analysisCountThisMonth);
 
   return json({
     shop: {
       domain: session.shop,
       primaryGoal: shop?.primaryGoal || null,
       lastAnalysis: shop?.lastAnalysis?.toISOString() || null,
+    },
+    billing: {
+      canAnalyze: billingCheck.allowed,
+      limitReason: billingCheck.reason,
+      analysisLimit: planConfig.features.analysisPerMonth,
+      analysisUsed: analysisCountThisMonth,
+      plan: currentPlan,
     },
   });
 };
@@ -43,6 +72,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (!shop) {
       logger.error(`Shop not found: ${session.shop}`);
       return json({ error: 'Shop not found. Please reinstall the app.' }, { status: 404 });
+    }
+
+    // Billing validation: check if shop can perform analysis
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const analysisCountThisMonth = await prisma.shopMetrics.count({
+      where: {
+        shopId: shop.id,
+        recordedAt: { gte: startOfMonth },
+      },
+    });
+
+    const billingCheck = await canPerformAnalysis(shop.plan || 'free', analysisCountThisMonth);
+    if (!billingCheck.allowed) {
+      logger.warn(`Billing limit reached for ${shop.domain}: ${billingCheck.reason}`);
+      return json({ error: billingCheck.reason }, { status: 429 });
     }
 
     // Clear previous recommendations
@@ -81,7 +128,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function StartAnalysis() {
-  const { shop } = useLoaderData<typeof loader>();
+  const { shop, billing } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
@@ -111,7 +158,19 @@ export default function StartAnalysis() {
       backAction={{ url: '/app' }}
     >
       <BlockStack gap="500">
-        {actionData?.error && (
+        {!billing.canAnalyze && (
+        <Banner
+          tone="warning"
+          action={{ content: 'Upgrade Plan', url: '/app/upgrade' }}
+        >
+          <p>
+            You&apos;ve used {billing.analysisUsed} of {billing.analysisLimit >= 999 ? '∞' : billing.analysisLimit} analyses this month.
+            {' '}{billing.limitReason}
+          </p>
+        </Banner>
+      )}
+
+      {actionData?.error && (
         <div style={{ marginBottom: '16px' }}>
           <Banner tone="critical">
             <p><strong>Error:</strong> {actionData.error}</p>
@@ -124,7 +183,7 @@ export default function StartAnalysis() {
         </div>
       )}
 
-      {shop.lastAnalysis && (
+      {shop.lastAnalysis && billing.canAnalyze && (
         <div style={{ marginBottom: '16px' }}>
           <Banner tone="info">
             Last analysis: {new Date(shop.lastAnalysis).toLocaleDateString()}. Running a new analysis will replace your existing recommendations.
@@ -156,8 +215,8 @@ export default function StartAnalysis() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div className="brand-primary-button">
-                <Button submit variant="primary" loading={isSubmitting} disabled={!selectedGoal}>
-                  {isSubmitting ? 'Starting Analysis...' : 'Start Analysis'}
+                <Button submit variant="primary" loading={isSubmitting} disabled={!selectedGoal || !billing.canAnalyze}>
+                  {!billing.canAnalyze ? 'Limit Reached' : isSubmitting ? 'Starting Analysis...' : 'Start Analysis'}
                 </Button>
               </div>
               <Button url="/app">Cancel</Button>

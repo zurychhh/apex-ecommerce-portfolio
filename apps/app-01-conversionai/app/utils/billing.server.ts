@@ -73,14 +73,17 @@ export async function createSubscription(
     returnUrl = `https://${shop}/admin/apps/${handle}`;
   }
 
+  // Use test mode unless explicitly set to false via env var
+  const isTestMode = process.env.SHOPIFY_BILLING_TEST !== 'false' && process.env.NODE_ENV !== 'production';
+
   try {
     const response = await admin.graphql(
-      `mutation CreateAppSubscription($name: String!, $returnUrl: URL!, $trialDays: Int, $lineItems: [AppSubscriptionLineItemInput!]!) {
+      `mutation CreateAppSubscription($name: String!, $returnUrl: URL!, $trialDays: Int, $test: Boolean!, $lineItems: [AppSubscriptionLineItemInput!]!) {
         appSubscriptionCreate(
           name: $name
           returnUrl: $returnUrl
           trialDays: $trialDays
-          test: ${process.env.NODE_ENV !== 'production'}
+          test: $test
           lineItems: $lineItems
         ) {
           appSubscription {
@@ -103,6 +106,7 @@ export async function createSubscription(
           name: `ConversionAI ${planConfig.name}`,
           returnUrl: returnUrl,
           trialDays: planConfig.trialDays,
+          test: isTestMode,
           lineItems: [
             {
               plan: {
@@ -120,15 +124,22 @@ export async function createSubscription(
       }
     );
 
-    const result = response.json?.data?.appSubscriptionCreate;
+    const responseJson = await response.json();
+    const result = responseJson.data?.appSubscriptionCreate;
 
     if (result?.userErrors?.length > 0) {
       logger.error('Billing API error:', result.userErrors);
       throw new Error(result.userErrors[0].message);
     }
 
+    if (!result) {
+      logger.error('Billing API returned empty result:', JSON.stringify(responseJson));
+      throw new Error('Shopify Billing API returned empty response');
+    }
+
     logger.info(`Subscription created for ${shop}: ${plan}`, {
       subscriptionId: result?.appSubscription?.id,
+      testMode: isTestMode,
     });
 
     return {
@@ -163,8 +174,9 @@ export async function checkActiveSubscription(admin: any) {
       }`
     );
 
+    const responseJson = await response.json();
     const subscriptions =
-      response.json?.data?.currentAppInstallation?.activeSubscriptions || [];
+      responseJson.data?.currentAppInstallation?.activeSubscriptions || [];
 
     return subscriptions;
   } catch (error) {
@@ -198,7 +210,8 @@ export async function cancelSubscription(admin: any, subscriptionId: string) {
       }
     );
 
-    const result = response.json?.data?.appSubscriptionCancel;
+    const responseJson = await response.json();
+    const result = responseJson.data?.appSubscriptionCancel;
 
     if (result?.userErrors?.length > 0) {
       throw new Error(result.userErrors[0].message);

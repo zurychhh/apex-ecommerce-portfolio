@@ -95,12 +95,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const currentPlan = shop?.plan || "free";
   const planConfig = PLANS[currentPlan] || PLANS.free;
 
-  // Count analyses this month
+  // Count analyses this month by counting ShopMetrics records (1 per analysis)
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const analysisCountThisMonth = shop?.lastAnalysis && shop.lastAnalysis >= startOfMonth ? 1 : 0;
+  const analysisCountThisMonth = shop?.id
+    ? await prisma.shopMetrics.count({
+        where: {
+          shopId: shop.id,
+          recordedAt: { gte: startOfMonth },
+        },
+      })
+    : 0;
   const billingCheck = await canPerformAnalysis(currentPlan, analysisCountThisMonth);
 
   return json({

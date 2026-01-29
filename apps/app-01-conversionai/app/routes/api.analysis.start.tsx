@@ -11,6 +11,7 @@ import { authenticate } from '../shopify.server';
 import { queueAnalysis } from '../utils/queue.server';
 import { prisma } from '../utils/db.server';
 import { logger } from '../utils/logger.server';
+import { canPerformAnalysis } from '../utils/billing.server';
 
 export async function action({ request }: ActionFunctionArgs) {
   try {
@@ -44,8 +45,26 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
-    // 4. Check if there's already an analysis running (optional rate limiting)
-    // For now, allow multiple analyses
+    // 4. Billing validation: check monthly analysis limit
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const analysisCountThisMonth = await prisma.shopMetrics.count({
+      where: {
+        shopId: shop.id,
+        recordedAt: { gte: startOfMonth },
+      },
+    });
+
+    const billingCheck = await canPerformAnalysis(shop.plan || 'free', analysisCountThisMonth);
+    if (!billingCheck.allowed) {
+      logger.warn(`[API] Billing limit reached for ${shop.domain}: ${billingCheck.reason}`);
+      return json(
+        { error: billingCheck.reason },
+        { status: 429 }
+      );
+    }
 
     // 5. Delete old recommendations before new analysis
     await prisma.recommendation.deleteMany({
