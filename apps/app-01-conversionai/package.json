@@ -2,6 +2,7 @@
   "name": "@apex/app-01-conversionai",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "remix vite:dev",
     "build": "remix vite:build",
