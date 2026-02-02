@@ -62,15 +62,17 @@ export async function createSubscription(
     throw new Error(`Invalid plan: ${plan}`);
   }
 
-  // Check if appHandle is a full URL or just a handle
+  // Build the return URL using the canonical admin.shopify.com format
+  // This ensures the merchant stays within the standard admin frame
   let returnUrl: string;
   if (appHandle && appHandle.startsWith('http')) {
     // Full URL provided (for testing or custom deployments)
     returnUrl = appHandle;
   } else {
-    // App handle provided - construct standard admin URL
-    const handle = appHandle || process.env.SHOPIFY_APP_HANDLE || 'conversionai';
-    returnUrl = `https://${shop}/admin/apps/${handle}`;
+    const handle = appHandle || process.env.SHOPIFY_APP_HANDLE || 'conversionai-1';
+    // Extract shop name from myshopify.com domain for canonical URL
+    const shopName = shop.replace('.myshopify.com', '');
+    returnUrl = `https://admin.shopify.com/store/${shopName}/apps/${handle}`;
   }
 
   // Use test mode unless explicitly set to false via env var
