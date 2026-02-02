@@ -4,7 +4,8 @@
  */
 
 import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { Form, useLoaderData } from '@remix-run/react';
+import { useLoaderData, useFetcher } from '@remix-run/react';
+import { useEffect } from 'react';
 import {
   Page,
   Layout,
@@ -17,6 +18,8 @@ import {
   Icon,
   Box,
   Divider,
+  Banner,
+  Spinner,
 } from '@shopify/polaris';
 import { BrandedFooter } from '../components/BrandedFooter';
 import { CheckIcon } from '@shopify/polaris-icons';
@@ -49,6 +52,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function UpgradePage() {
   const { currentPlan, plans } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<{ confirmationUrl?: string; error?: string }>();
+
+  // When the billing API returns a confirmationUrl, redirect the TOP-LEVEL
+  // window (not the iframe) to Shopify's subscription confirmation page.
+  useEffect(() => {
+    if (fetcher.data?.confirmationUrl) {
+      // open() with '_top' navigates the parent frame out of the iframe
+      open(fetcher.data.confirmationUrl, '_top');
+    }
+  }, [fetcher.data]);
+
+  const isSubmitting = fetcher.state !== 'idle';
 
   const formatFeature = (key: string, value: any): string => {
     switch (key) {
@@ -136,20 +151,31 @@ export default function UpgradePage() {
                           Free Forever
                         </Button>
                       ) : (
-                        <Form method="post" action="/api/billing/create">
+                        <fetcher.Form method="post" action="/api/billing/create">
                           <input type="hidden" name="plan" value={plan.id} />
+                          {fetcher.data?.error && (
+                            <Box paddingBlockEnd="200">
+                              <Banner tone="critical">
+                                <p>{fetcher.data.error}</p>
+                              </Banner>
+                            </Box>
+                          )}
                           <div className="brand-primary-button">
                             <Button
                               submit
                               variant="primary"
                               fullWidth
+                              loading={isSubmitting}
+                              disabled={isSubmitting}
                             >
-                              {currentPlan === 'free'
-                                ? `Start ${plan.trialDays}-Day Trial`
-                                : `Upgrade to ${plan.name}`}
+                              {isSubmitting
+                                ? 'Redirecting...'
+                                : currentPlan === 'free'
+                                  ? `Start ${plan.trialDays}-Day Trial`
+                                  : `Upgrade to ${plan.name}`}
                             </Button>
                           </div>
-                        </Form>
+                        </fetcher.Form>
                       )}
                     </Box>
                   </BlockStack>

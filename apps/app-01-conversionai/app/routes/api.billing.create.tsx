@@ -5,7 +5,7 @@
  * Creates a new Shopify app subscription and returns confirmation URL
  */
 
-import { json, redirect, type ActionFunctionArgs } from '@remix-run/node';
+import { json, type ActionFunctionArgs } from '@remix-run/node';
 import { authenticate } from '../shopify.server';
 import { createSubscription, PLANS } from '../utils/billing.server';
 import { prisma } from '../utils/db.server';
@@ -51,10 +51,12 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
 
-    logger.info(`Subscription created, redirecting to confirmation: ${session.shop}`);
+    logger.info(`Subscription created, returning confirmation URL: ${session.shop}`);
 
-    // Redirect to Shopify's confirmation page
-    return redirect(result.confirmationUrl);
+    // Return confirmationUrl as JSON - the client must redirect the top-level
+    // window (not the iframe) to this URL. A server-side redirect would try to
+    // load admin.shopify.com inside its own iframe, which is blocked.
+    return json({ confirmationUrl: result.confirmationUrl });
   } catch (error: any) {
     logger.error('Billing create error:', error);
 
