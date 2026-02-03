@@ -75,8 +75,8 @@ export async function createSubscription(
     returnUrl = `https://admin.shopify.com/store/${shopName}/apps/${handle}`;
   }
 
-  // Use test mode unless explicitly set to false via env var
-  const isTestMode = process.env.SHOPIFY_BILLING_TEST !== 'false' && process.env.NODE_ENV !== 'production';
+  // Use test mode if explicitly enabled OR if not in production
+  const isTestMode = process.env.SHOPIFY_BILLING_TEST === 'true' || process.env.NODE_ENV !== 'production';
 
   try {
     const response = await admin.graphql(
