@@ -4,13 +4,13 @@ import { login } from "../../shopify.server";
 
 // Loader: login() auto-redirects if shop param is present
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const errors = login(request);
+  const errors = await login(request);
   return json({ errors });
 };
 
 // Action: handles POST (form submission if needed)
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const errors = login(request);
+  const errors = await login(request);
   return json({ errors });
 };
 
